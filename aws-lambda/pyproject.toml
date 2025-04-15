@@ -21,7 +21,7 @@ requests = ">=2.22"
 boto3 = "^1.21.10"
 cfnresponse = "^1.1.2"
 tenacity = "^8.2.2"
-databricks-sdk = "^0.13.0"
+databricks-sdk = ">=0.13,<0.51"
 
 [tool.poetry.dev-dependencies]
 coverage = { version = "^6.1.1", extras = ["toml"] }
