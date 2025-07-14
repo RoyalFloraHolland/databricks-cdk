@@ -28,4 +28,8 @@ export class ServicePrincipalSecrets extends CustomResource {
     public secretsManagerName(): string {
         return this.getAttString("secrets_manager_name");
     }
+
+    public secretsManagerApplicationId(): string {
+        return this.getAttString("secrets_manager_application_id");
+    }
 }

@@ -28,6 +28,7 @@ class ServicePrincipalSecretsProperties(BaseModel):
 class ServicePrincipalSecretsResponse(CnfResponse):
     secrets_manager_arn: str
     secrets_manager_name: str
+    secrets_manager_application_id: str
 
 
 def create_or_update_service_principal_secrets(
@@ -86,6 +87,7 @@ def create_service_principal_secrets(
         physical_resource_id=created_service_principal_secrets.id,
         secrets_manager_arn=secrets_manager_resource["ARN"],
         secrets_manager_name=secrets_manager_resource["Name"],
+        secrets_manager_application_id=service_principal.application_id,
     )
 
 
@@ -110,6 +112,7 @@ def get_existing_service_principal_secrets_response(
         physical_resource_id=existing_service_principal_secrets.id,
         secrets_manager_arn=secrets_manager_resource["ARN"],
         secrets_manager_name=secrets_manager_resource["Name"],
+        secrets_manager_application_id=service_principal.application_id,
     )
 
 
