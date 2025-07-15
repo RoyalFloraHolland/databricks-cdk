@@ -119,7 +119,6 @@ def test_create_service_principal_secrets(
         physical_resource_id="some_id",
         secrets_manager_arn="mock_arn",
         secrets_manager_name="mock_secrets_manager_name",
-        secrets_manager_application_id="some_client_id",
     )
     account_client.service_principal_secrets.create.assert_called_once_with(
         service_principal_id=1,
@@ -163,7 +162,6 @@ def test_get_existing_service_principal_response(
         physical_resource_id="some_id",
         secrets_manager_arn="mock_arn",
         secrets_manager_name="mock_secrets_manager_name",
-        secrets_manager_application_id="some_client_id",
     )
     patched_get_service_principal_secrets.assert_called_once_with(
         service_principal_id=1,
