@@ -15,7 +15,7 @@ include = ["LICENSE"]
 packages = [{ include = "databricks_cdk", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 pydantic = "^1.4.0"
 requests = ">=2.22"
 boto3 = "^1.21.10"
@@ -35,7 +35,7 @@ mypy = "^0.971"
 
 [tool.black]
 line-length = 120
-target-version = ["py38"]
+target-version = ["py39"]
 
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit/report.xml"
