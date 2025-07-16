@@ -16,18 +16,19 @@ env:
   IMAGE_NAME: databricks-cdk-lambda
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+permissions:
+  contents: write
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        token: ${{ secrets.GIT_TOKEN_DANIEL }}
+      uses: actions/checkout@v4
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v5
       with:
         node-version: '16.x'
         registry-url: 'https://registry.npmjs.org'
@@ -38,7 +39,7 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 - --version 1.2.2
 
     - name: Docker login
-      uses: docker/login-action@v1
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB}}
@@ -64,7 +65,7 @@ jobs:
         poetry update
         git add pyproject.toml poetry.lock
         git commit -m "Bump version to ${NEW_VERSION}"
-        git tag "v${NEW_VERSION}"
+        git tag -a -m "Bump version to ${NEW_VERSION}" "v${NEW_VERSION}"
 
         # Docker build
         docker build -t "${{ env.IMAGE_NAME }}:dev" .
@@ -78,8 +79,7 @@ jobs:
 
         cd ../
 
-        git push
-        git push --tags
+        git push --follow-tags
         echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
     - name: Create Release
