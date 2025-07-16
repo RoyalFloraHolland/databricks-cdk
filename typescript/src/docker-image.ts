@@ -10,7 +10,7 @@ export class DockerImage {
         const dockerFile = path.join(dockerTempDir, "Dockerfile");
 
         const lambdaVersion = version || DockerImage.version();
-        fs.writeFileSync(dockerFile, `FROM godatadriven/databricks-cdk-lambda:${lambdaVersion}`);
+        fs.writeFileSync(dockerFile, `FROM floriday/databricks-cdk-lambda:${lambdaVersion}`);
 
         // Random hash will trigger a rebuild always, only need if dev is used
         const randomHash = (lambdaVersion == "dev") ? randomUUID() : "";

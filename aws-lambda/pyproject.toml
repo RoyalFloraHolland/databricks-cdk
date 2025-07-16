@@ -2,13 +2,13 @@
 name = "databricks-cdk"
 version = "0.11.29"
 description = "Deploying databricks resources from cdk"
-authors = ["Peter van 't Hof' <peter.vanthof@godatadriven.com>"]
+authors = ["The Data Science Team <teamdatascience@royalfloraholland.com>"]
 
 keywords = ["databricks", "cdk", "aws"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/godatadriven/databricks-cdk"
-repository = "https://github.com/godatadriven/databricks-cdk"
+homepage = "https://github.com/RoyalFloraHolland/databricks-cdk"
+repository = "https://github.com/RoyalFloraHolland/databricks-cdk"
 include = ["LICENSE"]
 
 

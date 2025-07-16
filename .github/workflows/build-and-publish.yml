@@ -52,7 +52,7 @@ jobs:
         cd typescript
         # Install npm package
         npm ci
-        
+
         NEW_VERSION=$(npm version "${BUMP_LEVEL}" | sed "s/^v//")
         git config --local user.email "Bumpversion"
         git config --local user.name "Bumpversion"
@@ -68,10 +68,10 @@ jobs:
 
         # Docker build
         docker build -t "${{ env.IMAGE_NAME }}:dev" .
-        docker tag "${{ env.IMAGE_NAME }}:dev" "godatadriven/${{ env.IMAGE_NAME }}:dev"
-        docker tag "${{ env.IMAGE_NAME }}:dev" "godatadriven/${{ env.IMAGE_NAME }}:${NEW_VERSION}"
-        docker push "godatadriven/${{ env.IMAGE_NAME }}:dev"
-        docker push "godatadriven/${{ env.IMAGE_NAME }}:${NEW_VERSION}"
+        docker tag "${{ env.IMAGE_NAME }}:dev" "floriday/${{ env.IMAGE_NAME }}:dev"
+        docker tag "${{ env.IMAGE_NAME }}:dev" "floriday/${{ env.IMAGE_NAME }}:${NEW_VERSION}"
+        docker push "floriday/${{ env.IMAGE_NAME }}:dev"
+        docker push "floriday/${{ env.IMAGE_NAME }}:${NEW_VERSION}"
 
         cd ../typescript
         npm publish

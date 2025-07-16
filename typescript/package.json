@@ -17,7 +17,7 @@
     "author": "Peter van 't Hof",
     "repository": {
         "type": "git",
-        "url": "https://github.com/godatadriven/databricks-cdk"
+        "url": "https://github.com/RoyalFloraHolland/databricks-cdk"
     },
     "scripts": {
         "lint": "eslint --max-warnings 0 'src/**/*.ts'",
