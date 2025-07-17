@@ -1,6 +1,6 @@
 {
     "name": "databricks-cdk",
-    "version": "0.11.31",
+    "version": "0.11.32",
     "license": "MIT",
     "description": "With this package databricks resources can be deployed with cdk",
     "type": "commonjs",
