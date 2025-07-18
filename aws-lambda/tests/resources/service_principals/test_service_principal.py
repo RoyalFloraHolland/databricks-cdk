@@ -132,23 +132,28 @@ def test_create_service_principal(workspace_client):
         workspace_url="https://test.cloud.databricks.com",
         service_principal=ServicePrincipal(
             active=True,
+            application_id="mock_application_id",
             display_name="mock_name",
         ),
     )
     workspace_client.service_principals.create.return_value = ServicePrincipal(
         active=True,
+        application_id="mock_application_id",
         display_name="mock_name",
         id="some_id",
     )
 
     response = create_service_principal(mock_properties.service_principal, workspace_client)
 
-    assert response == ServicePrincipalResponse(name="mock_name", physical_resource_id="some_id")
+    assert response == ServicePrincipalResponse(
+        name="mock_name", physical_resource_id="some_id", application_id="mock_application_id"
+    )
+
     workspace_client.service_principals.create.assert_called_once_with(
         display_name="mock_name",
         active=True,
         id=None,
-        application_id=None,
+        application_id="mock_application_id",
         entitlements=None,
         external_id=None,
         groups=None,
@@ -180,6 +185,7 @@ def test_update_service_principal(workspace_client):
         workspace_url="https://test.cloud.databricks.com",
         service_principal=ServicePrincipal(
             active=True,
+            application_id="mock_application_id",
             display_name="mock_name",
             id="some_id",
             roles=[ComplexValue(value="role")],
@@ -187,6 +193,7 @@ def test_update_service_principal(workspace_client):
     )
     workspace_client.service_principals.update.return_value = ServicePrincipal(
         active=True,
+        application_id="mock_application_id",
         display_name="mock_name",
         id="some_id",
         roles=[ComplexValue(value="role")],
@@ -194,13 +201,16 @@ def test_update_service_principal(workspace_client):
 
     response = update_service_principal(mock_properties.service_principal, workspace_client)
 
-    assert response == ServicePrincipalResponse(name="mock_name", physical_resource_id="some_id")
+    assert response == ServicePrincipalResponse(
+        name="mock_name", physical_resource_id="some_id", application_id="mock_application_id"
+    )
+
     workspace_client.service_principals.update.assert_called_once_with(
         active=True,
         display_name="mock_name",
         id="some_id",
         roles=[ComplexValue(value="role")],
-        application_id=None,
+        application_id="mock_application_id",
         entitlements=None,
         external_id=None,
         groups=None,

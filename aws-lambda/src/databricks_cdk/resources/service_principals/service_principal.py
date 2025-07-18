@@ -25,6 +25,7 @@ class ServicePrincipalProperties(BaseModel):
 
 class ServicePrincipalResponse(CnfResponse):
     name: str
+    application_id: str
 
 
 def create_or_update_service_principal(properties: ServicePrincipalProperties) -> ServicePrincipalResponse:
@@ -77,7 +78,9 @@ def create_service_principal(
         raise ServicePrincipalCreationError("Service principal creation failed, there was no id found")
 
     return ServicePrincipalResponse(
-        name=created_service_principal.display_name, physical_resource_id=created_service_principal.id
+        name=created_service_principal.display_name,
+        physical_resource_id=created_service_principal.id,
+        application_id=created_service_principal.application_id,
     )
 
 
@@ -98,7 +101,11 @@ def update_service_principal(
         schemas=service_principal.schemas,
     )
 
-    return ServicePrincipalResponse(name=service_principal.display_name, physical_resource_id=service_principal.id)
+    return ServicePrincipalResponse(
+        name=service_principal.display_name,
+        physical_resource_id=service_principal.id,
+        application_id=service_principal.application_id,
+    )
 
 
 def delete_service_principal(properties: ServicePrincipalProperties, physical_resource_id: str) -> CnfResponse:
