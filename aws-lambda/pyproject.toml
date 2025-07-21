@@ -24,7 +24,7 @@ tenacity = "^8.2.2"
 databricks-sdk = "^0.13.0"
 
 [tool.poetry.dev-dependencies]
-coverage = { version = "^6.1.1", extras = ["toml"] }
+coverage = { version = "^7.9.2", extras = ["toml"] }
 pytest = "7.0.1"
 pytest-mock = "3.6.1"
 pyproject-flake8 = "^5.0.4"
