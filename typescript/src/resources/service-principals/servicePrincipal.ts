@@ -46,4 +46,8 @@ export class ServicePrincipal extends CustomResource {
     public servicePrincipalName(): string {
         return this.getAttString("name");
     }
+
+    public servicePrincipalApplicationId(): string {
+        return this.getAttString("application_id");
+    }
 }
