@@ -136,6 +136,25 @@ class CronSchedule(BaseModel):
     pause_status: Optional[str] = None
 
 
+class FileArrivalTriggerConfiguration(BaseModel):
+    url: str
+    min_time_between_triggers_seconds: Optional[int] = None
+    wait_after_last_change_seconds: Optional[int] = None
+
+
+class TableUpdateTriggerConfiguration(BaseModel):
+    table_names: List[str]
+    condition: Optional[str] = None
+    min_time_between_triggers_seconds: Optional[int] = None
+    wait_after_last_change_seconds: Optional[int] = None
+
+
+class TriggerSettings(BaseModel):
+    pause_status: Optional[str] = None
+    file_arrival: Optional[FileArrivalTriggerConfiguration] = None
+    table_update: Optional[TableUpdateTriggerConfiguration] = None
+
+
 class AccessControlRequestForUser(BaseModel):
     user_name: str
     permission_level: str
@@ -153,6 +172,7 @@ class JobSettings(BaseModel):
     email_notifications: Optional[JobEmailNotifications] = None
     timeout_seconds: Optional[int] = None
     schedule: Optional[CronSchedule]
+    trigger: Optional[TriggerSettings] = None
     max_concurrent_runs: Optional[int] = None
     format: str = "MULTI_TASK"
     access_control_list: Optional[List[Union[AccessControlRequestForUser, AccessControlRequestForGroup]]] = None
@@ -186,6 +206,18 @@ def get_job_by_id(job_id: str, workspace_url: str):
     return resp.json()
 
 
+def job_settings_body(job: JobSettings) -> dict:
+    """Serialize job settings for the Jobs API.
+
+    A trigger carries exactly one trigger type, so its unset fields are left out instead of sent as null.
+    Without a trigger the field is left out too, so the body of jobs that don't use one is unchanged.
+    """
+    body = json.loads(job.json(exclude={"trigger"}))
+    if job.trigger is not None:
+        body["trigger"] = json.loads(job.trigger.json(exclude_none=True))
+    return body
+
+
 def create_or_update_job(properties: JobProperties, physical_resource_id: Optional[str]) -> JobResponse:
     """Create job at databricks"""
     current: Optional[dict] = None
@@ -193,14 +225,14 @@ def create_or_update_job(properties: JobProperties, physical_resource_id: Option
     if physical_resource_id is not None:
         current = get_job_by_id(physical_resource_id, properties.workspace_url)
     if current is None:
-        create_response = post_request(f"{url}/create", body=json.loads(properties.job.json()))
+        create_response = post_request(f"{url}/create", body=job_settings_body(properties.job))
         job_id = create_response.get("job_id")
         return JobResponse(job_id=job_id, physical_resource_id=job_id)
     else:
         job_id = current.get("job_id")
         reset_body = {
             "job_id": job_id,
-            "new_settings": json.loads(properties.job.json()),
+            "new_settings": job_settings_body(properties.job),
         }
         post_request(f"{url}/reset", body=reset_body)
         return JobResponse(job_id=job_id, physical_resource_id=job_id)

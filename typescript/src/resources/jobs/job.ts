@@ -164,6 +164,28 @@ export interface JobCronSchedule {
     pause_status?: string
 }
 
+export interface JobFileArrivalTrigger {
+    url: string
+    min_time_between_triggers_seconds?: number
+    wait_after_last_change_seconds?: number
+}
+
+export interface JobTableUpdateTrigger {
+    table_names: Array<string>
+    condition?: "ANY_UPDATED" | "ALL_UPDATED"
+    min_time_between_triggers_seconds?: number
+    wait_after_last_change_seconds?: number
+}
+
+/**
+ * Set exactly one of file_arrival or table_update. A job with a trigger should not also have a schedule.
+ */
+export interface JobTriggerSettings {
+    pause_status?: "PAUSED" | "UNPAUSED"
+    file_arrival?: JobFileArrivalTrigger
+    table_update?: JobTableUpdateTrigger
+}
+
 export interface JobAccessControlRequestForUser {
     user_name: string
     permission_level: string
@@ -181,6 +203,7 @@ export interface JobSettings {
     email_notifications?: JobEmailNotifications
     timeout_seconds?: number
     schedule?: JobCronSchedule
+    trigger?: JobTriggerSettings
     max_concurrent_runs?: number
     format?: string
     access_control_list?: Array<JobAccessControlRequestForUser | JobAccessControlRequestForGroup>
