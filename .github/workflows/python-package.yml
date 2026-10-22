@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         working-directory: aws-lambda
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.2.1
           poetry install
       - name: Test with pytest
         working-directory: aws-lambda
@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         working-directory: aws-lambda
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.2.1
           poetry install
       - name: Lint with flake8
         working-directory: aws-lambda
@@ -76,7 +76,7 @@ jobs:
       - name: Install dependencies
         working-directory: aws-lambda
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.2.1
           poetry install
       - name: Lint with black
         working-directory: aws-lambda
@@ -94,7 +94,7 @@ jobs:
       - name: Install dependencies
         working-directory: aws-lambda
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.2.1
           poetry install
       - name: Lint with isort
         working-directory: aws-lambda
