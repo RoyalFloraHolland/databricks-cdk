@@ -15,7 +15,7 @@ include = ["LICENSE"]
 packages = [{ include = "databricks_cdk", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.12"
 pydantic = "^1.4.0"
 requests = ">=2.22"
 boto3 = "^1.21.10"
@@ -23,19 +23,19 @@ cfnresponse = "^1.1.2"
 tenacity = "^8.2.2"
 databricks-sdk = "^0.13.0"
 
-[tool.poetry.dev-dependencies]
-coverage = { version = "^6.1.1", extras = ["toml"] }
-pytest = "7.0.1"
-pytest-mock = "3.6.1"
-pyproject-flake8 = "^5.0.4"
-isort = "^5.10.0"
-black = "^22.3.0"
-pytest-cov = "^4.0.0"
-mypy = "^0.971"
+[tool.poetry.group.dev.dependencies]
+coverage = { version = "^7.6", extras = ["toml"] }
+pytest = "^8.3"
+pytest-mock = "^3.14"
+pyproject-flake8 = "^7.0"
+isort = "^5.13"
+black = "^24.8"
+pytest-cov = "^5.0"
+mypy = "^1.11"
 
 [tool.black]
 line-length = 120
-target-version = ["py39"]
+target-version = ["py312"]
 
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit/report.xml"
@@ -62,7 +62,7 @@ line_length = 120
 
 [tool.mypy]
 files = "src/"
-python_version = "3.9"
+python_version = "3.12"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
