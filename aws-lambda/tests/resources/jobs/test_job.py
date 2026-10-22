@@ -1,5 +1,8 @@
 from unittest.mock import patch
 
+import pytest
+from pydantic import ValidationError
+
 from databricks_cdk.resources.jobs.job import (
     AwsAttributes,
     FileArrivalTriggerConfiguration,
@@ -74,6 +77,35 @@ def test_job_settings_parses_trigger_from_cloudformation_properties():
 
     assert properties.job.trigger.file_arrival.url == "s3://bucket/prefix/"
     assert properties.job.trigger.file_arrival.wait_after_last_change_seconds == 60
+
+
+def test_trigger_settings_rejects_both_trigger_types():
+    with pytest.raises(ValidationError, match="got: file_arrival, table_update"):
+        TriggerSettings(
+            file_arrival=FileArrivalTriggerConfiguration(url="/Volumes/catalog/schema/volume/"),
+            table_update=TableUpdateTriggerConfiguration(table_names=["catalog.schema.table"]),
+        )
+
+
+def test_trigger_settings_rejects_no_trigger_type():
+    with pytest.raises(ValidationError, match="got: none"):
+        TriggerSettings(pause_status="UNPAUSED")
+
+
+def test_job_properties_rejects_invalid_trigger_from_cloudformation_properties():
+    with pytest.raises(ValidationError, match="exactly one of file_arrival or table_update"):
+        JobProperties(
+            workspace_url="https://test.cloud.databricks.com",
+            job={
+                "name": "job",
+                "tasks": [{"task_key": "task"}],
+                "job_clusters": [],
+                "trigger": {
+                    "file_arrival": {"url": "s3://bucket/prefix/"},
+                    "table_update": {"table_names": ["catalog.schema.table"]},
+                },
+            },
+        )
 
 
 @patch("databricks_cdk.resources.jobs.job.post_request")

@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Optional, Union
 
 import requests
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 
 from databricks_cdk.utils import CnfResponse, get_authorization_headers, post_request
 
@@ -137,12 +137,22 @@ class CronSchedule(BaseModel):
 
 
 class FileArrivalTriggerConfiguration(BaseModel):
+    """File arrival trigger, see https://docs.databricks.com/aws/en/jobs/file-arrival-triggers
+
+    API: `trigger.file_arrival` in https://docs.databricks.com/api/workspace/jobs/create
+    """
+
     url: str
     min_time_between_triggers_seconds: Optional[int] = None
     wait_after_last_change_seconds: Optional[int] = None
 
 
 class TableUpdateTriggerConfiguration(BaseModel):
+    """Table update trigger, see https://docs.databricks.com/aws/en/jobs/trigger-table-update
+
+    API: `trigger.table_update` in https://docs.databricks.com/api/workspace/jobs/create
+    """
+
     table_names: List[str]
     condition: Optional[str] = None
     min_time_between_triggers_seconds: Optional[int] = None
@@ -150,9 +160,25 @@ class TableUpdateTriggerConfiguration(BaseModel):
 
 
 class TriggerSettings(BaseModel):
+    """Job trigger, see https://docs.databricks.com/aws/en/jobs/triggers
+
+    API: `trigger` in https://docs.databricks.com/api/workspace/jobs/create, also sent to `/jobs/reset` on update.
+    Field docs are on the TypeScript interfaces in typescript/src/resources/jobs/job.ts.
+    """
+
     pause_status: Optional[str] = None
     file_arrival: Optional[FileArrivalTriggerConfiguration] = None
     table_update: Optional[TableUpdateTriggerConfiguration] = None
+
+    @root_validator(skip_on_failure=True)
+    def check_one_trigger_type(cls, values: dict) -> dict:
+        trigger_types = [name for name in ("file_arrival", "table_update") if values.get(name) is not None]
+        if len(trigger_types) != 1:
+            raise ValueError(
+                "A job trigger must set exactly one of file_arrival or table_update, "
+                f"got: {', '.join(trigger_types) or 'none'}"
+            )
+        return values
 
 
 class AccessControlRequestForUser(BaseModel):
