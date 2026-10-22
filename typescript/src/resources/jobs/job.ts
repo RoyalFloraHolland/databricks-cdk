@@ -164,6 +164,66 @@ export interface JobCronSchedule {
     pause_status?: string
 }
 
+/**
+ * Starts a run when new files arrive in a Unity Catalog external location or volume.
+ * Sent as `trigger.file_arrival` in the Jobs API create and reset requests.
+ * @see https://docs.databricks.com/aws/en/jobs/file-arrival-triggers
+ * @see https://docs.databricks.com/api/workspace/jobs/create
+ */
+export interface JobFileArrivalTrigger {
+    /**
+     * Root or subpath of a Unity Catalog external location or volume, e.g. `/Volumes/catalog/schema/volume/`.
+     * Subdirectories are checked too.
+     */
+    url: string
+    /** Minimum time to wait after a run completes before triggering the next one. */
+    min_time_between_triggers_seconds?: number
+    /** Time to wait after the last file arrives before triggering. Each new file resets the timer. */
+    wait_after_last_change_seconds?: number
+}
+
+/**
+ * Starts a run when Unity Catalog tables are updated.
+ * Sent as `trigger.table_update` in the Jobs API create and reset requests.
+ * @see https://docs.databricks.com/aws/en/jobs/trigger-table-update
+ * @see https://docs.databricks.com/api/workspace/jobs/create
+ */
+export interface JobTableUpdateTrigger {
+    /** Full names of the tables to monitor, e.g. `catalog.schema.table`. At most 10. */
+    table_names: Array<string>
+    /** With several tables, whether any table or all of them must be updated. */
+    condition?: "ANY_UPDATED" | "ALL_UPDATED"
+    /** Minimum time to wait after a run completes before triggering the next one. */
+    min_time_between_triggers_seconds?: number
+    /** Time to wait after the last table update before triggering. Each new update resets the timer. */
+    wait_after_last_change_seconds?: number
+}
+
+interface JobTriggerSettingsBase {
+    /** Whether the trigger is active. */
+    pause_status?: "PAUSED" | "UNPAUSED"
+}
+
+/**
+ * Starts job runs on an event instead of a schedule. Set exactly one of `file_arrival` or `table_update`.
+ * A job with a trigger should not also have a schedule.
+ * Sent as `trigger` in the Jobs API create and reset requests (`POST /api/2.1/jobs/create`, `/jobs/reset`).
+ * @see https://docs.databricks.com/aws/en/jobs/triggers
+ * @see https://docs.databricks.com/api/workspace/jobs/create
+ */
+export type JobTriggerSettings =
+    | (JobTriggerSettingsBase & { file_arrival: JobFileArrivalTrigger, table_update?: never })
+    | (JobTriggerSettingsBase & { table_update: JobTableUpdateTrigger, file_arrival?: never })
+
+export function validateJobTrigger(trigger: JobTriggerSettings): void {
+    const types = (["file_arrival", "table_update"] as const).filter((type) => trigger[type] !== undefined);
+    if (types.length !== 1) {
+        throw new Error(
+            `A job trigger must set exactly one of file_arrival or table_update, got: ${types.join(", ") || "none"}`,
+        );
+    }
+}
+
 export interface JobAccessControlRequestForUser {
     user_name: string
     permission_level: string
@@ -181,6 +241,7 @@ export interface JobSettings {
     email_notifications?: JobEmailNotifications
     timeout_seconds?: number
     schedule?: JobCronSchedule
+    trigger?: JobTriggerSettings
     max_concurrent_runs?: number
     format?: string
     access_control_list?: Array<JobAccessControlRequestForUser | JobAccessControlRequestForGroup>
@@ -197,6 +258,9 @@ export interface JobProps extends JobProperties {
 
 export class Job extends CustomResource {
     constructor(scope: Construct, id: string, props: JobProps) {
+        if (props.job.trigger !== undefined) {
+            validateJobTrigger(props.job.trigger);
+        }
         super(scope, id, {
             serviceToken: props.serviceToken,
             properties: {
