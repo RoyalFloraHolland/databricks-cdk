@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Optional, Union
 
 import requests
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, validator
 
 from databricks_cdk.utils import CnfResponse, get_authorization_headers, post_request
 
@@ -109,10 +109,46 @@ class Library(BaseModel):
     cran: Optional[str] = None
 
 
+class RunJobTask(BaseModel):
+    """Runs another job, see https://docs.databricks.com/aws/en/jobs/run-job
+
+    API: `tasks[].run_job_task` in https://docs.databricks.com/api/workspace/jobs/create
+    """
+
+    job_id: int
+    job_parameters: Optional[Dict[str, str]] = None
+    python_params: Optional[List[str]] = None
+
+
+class ConditionTask(BaseModel):
+    """If/else branch, see https://docs.databricks.com/aws/en/jobs/if-else
+
+    API: `tasks[].condition_task` in https://docs.databricks.com/api/workspace/jobs/create
+    """
+
+    left: str
+    op: str
+    right: str
+
+
+class TaskDependency(BaseModel):
+    """API: `tasks[].depends_on[]` in https://docs.databricks.com/api/workspace/jobs/create"""
+
+    task_key: str
+    # "true" or "false": the branch of a condition_task this task runs on
+    outcome: Optional[str] = None
+
+
+# Task and job fields that are only sent when set, so the body of jobs that don't use them is unchanged
+OPTIONAL_TASK_FIELDS = {"run_if", "run_job_task", "condition_task"}
+OPTIONAL_JOB_FIELDS = {"trigger", "description", "queue", "parameters", "tags"}
+
+
 class JobTaskSettings(BaseModel):
     task_key: str
     description: Optional[str] = None
-    depends_on: List[str] = []
+    depends_on: List[TaskDependency] = []
+    run_if: Optional[str] = None
     existing_cluster_id: Optional[str] = None
     new_cluster: Optional[NewCluster] = None
     job_cluster_key: Optional[str] = None
@@ -122,12 +158,19 @@ class JobTaskSettings(BaseModel):
     spark_submit_task: Optional[SparkSubmitTask] = None
     pipeline_task: Optional[PipelineTask] = None
     python_wheel_task: Optional[PythonWheelTask] = None
+    run_job_task: Optional[RunJobTask] = None
+    condition_task: Optional[ConditionTask] = None
     libraries: List[Library] = []
     email_notifications: Optional[JobEmailNotifications] = None
     timeout_seconds: Optional[int] = None
     max_retries: Optional[int] = None
     min_retry_interval_millis: Optional[int] = None
     retry_on_timeout: bool = False
+
+    @validator("depends_on", pre=True, each_item=True)
+    def task_key_to_dependency(cls, value):
+        # depends_on used to be a list of task keys, which the Jobs API rejects
+        return {"task_key": value} if isinstance(value, str) else value
 
 
 class CronSchedule(BaseModel):
@@ -191,14 +234,28 @@ class AccessControlRequestForGroup(BaseModel):
     permission_level: str
 
 
+class QueueSettings(BaseModel):
+    enabled: bool
+
+
+class JobParameterDefinition(BaseModel):
+    name: str
+    default: str
+
+
 class JobSettings(BaseModel):
     name: str
+    description: Optional[str] = None
     tasks: List[JobTaskSettings]
-    job_clusters: List[JobCluster]
+    # Empty for a job whose tasks only run other jobs
+    job_clusters: List[JobCluster] = []
     email_notifications: Optional[JobEmailNotifications] = None
     timeout_seconds: Optional[int] = None
     schedule: Optional[CronSchedule]
     trigger: Optional[TriggerSettings] = None
+    queue: Optional[QueueSettings] = None
+    parameters: Optional[List[JobParameterDefinition]] = None
+    tags: Optional[Dict[str, str]] = None
     max_concurrent_runs: Optional[int] = None
     format: str = "MULTI_TASK"
     access_control_list: Optional[List[Union[AccessControlRequestForUser, AccessControlRequestForGroup]]] = None
@@ -235,12 +292,23 @@ def get_job_by_id(job_id: str, workspace_url: str):
 def job_settings_body(job: JobSettings) -> dict:
     """Serialize job settings for the Jobs API.
 
-    A trigger carries exactly one trigger type, so its unset fields are left out instead of sent as null.
-    Without a trigger the field is left out too, so the body of jobs that don't use one is unchanged.
+    The fields in OPTIONAL_JOB_FIELDS and OPTIONAL_TASK_FIELDS are only sent when set, without their own
+    unset fields: a trigger carries exactly one trigger type, and a task carries exactly one task type.
+    The body of jobs that don't use them is unchanged.
     """
-    body = json.loads(job.json(exclude={"trigger"}))
-    if job.trigger is not None:
-        body["trigger"] = json.loads(job.trigger.json(exclude_none=True))
+    body = json.loads(job.json(exclude={"tasks"} | OPTIONAL_JOB_FIELDS))
+    for field in OPTIONAL_JOB_FIELDS:
+        if getattr(job, field) is not None:
+            body[field] = json.loads(job.json(include={field}, exclude_none=True))[field]
+
+    body["tasks"] = []
+    for task in job.tasks:
+        task_body = json.loads(task.json(exclude=OPTIONAL_TASK_FIELDS))
+        task_body["depends_on"] = [json.loads(dependency.json(exclude_none=True)) for dependency in task.depends_on]
+        for field in OPTIONAL_TASK_FIELDS:
+            if getattr(task, field) is not None:
+                task_body[field] = json.loads(task.json(include={field}, exclude_none=True))[field]
+        body["tasks"].append(task_body)
     return body
 
 

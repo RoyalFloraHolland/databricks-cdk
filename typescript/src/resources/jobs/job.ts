@@ -137,10 +137,58 @@ export interface JobEmailNotifications {
     no_alert_for_skipped_runs?: boolean
 }
 
+/**
+ * Runs another job as a task.
+ * Sent as `tasks[].run_job_task` in the Jobs API create and reset requests.
+ * @see https://docs.databricks.com/aws/en/jobs/run-job
+ * @see https://docs.databricks.com/api/workspace/jobs/create
+ */
+export interface JobRunJobTask {
+    /** ID of the job to run, e.g. `otherJob.getAttString("job_id")`. */
+    job_id: number | string
+    /** Job-level parameters of the job to run. */
+    job_parameters?: Record<string, string>
+    /** Parameters for the job's Python tasks, replacing the ones in its definition. */
+    python_params?: Array<string>
+}
+
+/**
+ * An if/else branch. Tasks that depend on it pick a branch with `outcome`.
+ * Sent as `tasks[].condition_task` in the Jobs API create and reset requests.
+ * @see https://docs.databricks.com/aws/en/jobs/if-else
+ * @see https://docs.databricks.com/api/workspace/jobs/create
+ */
+export interface JobConditionTask {
+    /** Left operand, e.g. a task value `{{tasks.check.values.is_auction_day}}`. */
+    left: string
+    op: "EQUAL_TO" | "NOT_EQUAL" | "GREATER_THAN" | "GREATER_THAN_OR_EQUAL" | "LESS_THAN" | "LESS_THAN_OR_EQUAL"
+    right: string
+}
+
+export interface JobTaskDependency {
+    task_key: string
+    /** For a dependency on a condition task: the branch this task runs on. */
+    outcome?: "true" | "false"
+}
+
+/**
+ * When a task runs, based on the state of its dependencies. Defaults to `ALL_SUCCESS`.
+ * @see https://docs.databricks.com/aws/en/jobs/run-if
+ */
+export type JobRunIf =
+    | "ALL_SUCCESS"
+    | "AT_LEAST_ONE_SUCCESS"
+    | "NONE_FAILED"
+    | "ALL_DONE"
+    | "AT_LEAST_ONE_FAILED"
+    | "ALL_FAILED"
+
 export interface JobTaskSettings {
     task_key: string
     description?: string
-    depends_on?: Array<string>
+    /** Tasks that must finish first. A plain string is a task key, kept for compatibility. */
+    depends_on?: Array<JobTaskDependency | string>
+    run_if?: JobRunIf
     existing_cluster_id?: string
     new_cluster?: JobNewCluster
     job_cluster_key?: string
@@ -150,6 +198,8 @@ export interface JobTaskSettings {
     spark_submit_task?: JobSparkSubmitTask
     pipeline_task?: JobPipelineTask
     python_wheel_task?: JobPythonWheelTask
+    run_job_task?: JobRunJobTask
+    condition_task?: JobConditionTask
     libraries?: Array<JobTaskLibrary>
     email_notifications?: JobEmailNotifications
     timeout_seconds?: number
@@ -234,14 +284,30 @@ export interface JobAccessControlRequestForGroup {
     permission_level: string
 }
 
+/** @see https://docs.databricks.com/aws/en/jobs/advanced#queue-settings */
+export interface JobQueueSettings {
+    /** Queue runs that would exceed `max_concurrent_runs`, instead of skipping them. */
+    enabled: boolean
+}
+
+/** @see https://docs.databricks.com/aws/en/jobs/job-parameters */
+export interface JobParameterDefinition {
+    name: string
+    default: string
+}
+
 export interface JobSettings {
     name: string
+    description?: string
     tasks: Array<JobTaskSettings>
     job_clusters?: Array<JobCluster>
     email_notifications?: JobEmailNotifications
     timeout_seconds?: number
     schedule?: JobCronSchedule
     trigger?: JobTriggerSettings
+    queue?: JobQueueSettings
+    parameters?: Array<JobParameterDefinition>
+    tags?: Record<string, string>
     max_concurrent_runs?: number
     format?: string
     access_control_list?: Array<JobAccessControlRequestForUser | JobAccessControlRequestForGroup>

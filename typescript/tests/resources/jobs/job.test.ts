@@ -48,6 +48,55 @@ describe("Job", () => {
         );
     });
 
+    test("Job Custom Resource synthesizes a chain of run job tasks", () => {
+        const app = new cdk.App();
+        const databricksStack = new cdk.Stack(app, "DatabricksStack");
+
+        new Job(databricksStack, "Job", {
+            serviceToken: "some-arn",
+            workspaceUrl: "https://test.cloud.databricks.com",
+            job: {
+                name: "some-chain",
+                tasks: [
+                    {task_key: "first", run_job_task: {job_id: 1}},
+                    {
+                        task_key: "gate",
+                        depends_on: [{task_key: "first"}],
+                        condition_task: {left: "{{tasks.first.values.ok}}", op: "EQUAL_TO", right: "true"},
+                    },
+                    {
+                        task_key: "second",
+                        depends_on: [{task_key: "gate", outcome: "true"}],
+                        run_if: "ALL_SUCCESS",
+                        run_job_task: {job_id: 2, python_params: ["data", "--date", "2026-10-26"]},
+                    },
+                ],
+                queue: {enabled: true},
+                tags: {Application: "some-app"},
+            },
+        });
+
+        const template = Template.fromStack(databricksStack);
+        template.hasResourceProperties("AWS::CloudFormation::CustomResource",
+            {
+                "job": {
+                    "name": "some-chain",
+                    "tasks": [
+                        {"task_key": "first", "run_job_task": {"job_id": 1}},
+                        {"task_key": "gate", "depends_on": [{"task_key": "first"}]},
+                        {
+                            "task_key": "second",
+                            "depends_on": [{"task_key": "gate", "outcome": "true"}],
+                            "run_job_task": {"job_id": 2, "python_params": ["data", "--date", "2026-10-26"]},
+                        },
+                    ],
+                    "queue": {"enabled": true},
+                    "tags": {"Application": "some-app"},
+                },
+            }
+        );
+    });
+
     test("Job accepts a table update trigger", () => {
         expect(() => createJob({table_update: {table_names: ["catalog.schema.table"]}})).not.toThrow();
     });
