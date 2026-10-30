@@ -1,6 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
+# Install Python dependencies, run tests and lint the aws-lambda project
 name: Python package
 
 on:
@@ -9,106 +7,102 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write # test report
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.12"]
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: ./.github/actions/setup-uv
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Poetry
-        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
-        with:
-          version: 2.5.1
       - name: Install dependencies
         working-directory: aws-lambda
-        run: |
-          poetry install
+        run: uv sync --locked
       - name: Test with pytest
         working-directory: aws-lambda
         run: |
-          poetry run coverage run -m pytest
-          poetry run coverage report
-          poetry run coverage xml
+          uv run --locked coverage run -m pytest
+          uv run --locked coverage report
+          uv run --locked coverage xml
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@6ef3fdcfcd5f0b5d14df3e659ef19b8c6820f93d  # v6.6.1
         if: always() # always run even if the previous step fails
         with:
           report_paths: "aws-lambda/junit/report.xml"
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
         with:
           files: ./aws-lambda/coverage.xml
 
   flake8:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          python-version: "3.12"
-      - name: Install Poetry
-        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
-        with:
-          version: 2.5.1
+          persist-credentials: false
+      - name: Install uv
+        uses: ./.github/actions/setup-uv
       - name: Install dependencies
         working-directory: aws-lambda
-        run: |
-          poetry install
+        run: uv sync --locked
       - name: Lint with flake8
         working-directory: aws-lambda
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          poetry run pflake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          uv run --locked pflake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run pflake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          uv run --locked pflake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   black:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          python-version: "3.12"
-      - name: Install Poetry
-        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
-        with:
-          version: 2.5.1
+          persist-credentials: false
+      - name: Install uv
+        uses: ./.github/actions/setup-uv
       - name: Install dependencies
         working-directory: aws-lambda
-        run: |
-          poetry install
+        run: uv sync --locked
       - name: Lint with black
         working-directory: aws-lambda
         run: |
-          poetry run black --check .
+          uv run --locked black --check .
 
   isort:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          python-version: "3.12"
-      - name: Install Poetry
-        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
-        with:
-          version: 2.5.1
+          persist-credentials: false
+      - name: Install uv
+        uses: ./.github/actions/setup-uv
       - name: Install dependencies
         working-directory: aws-lambda
-        run: |
-          poetry install
+        run: uv sync --locked
       - name: Lint with isort
         working-directory: aws-lambda
         run: |
-          poetry run isort --check .
+          uv run --locked isort --check .
