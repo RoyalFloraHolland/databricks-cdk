@@ -1,37 +1,56 @@
-[tool.poetry]
+[project]
 name = "databricks-cdk"
 version = "0.11.38"
 description = "Deploying databricks resources from cdk"
-authors = ["The Data Science Team <teamdatascience@royalfloraholland.com>"]
-
-keywords = ["databricks", "cdk", "aws"]
+authors = [{ name = "The Data Science & AI Team", email = "teamdatascience@royalfloraholland.com" }]
+requires-python = ">=3.12,<3.13"
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/RoyalFloraHolland/databricks-cdk"
-repository = "https://github.com/RoyalFloraHolland/databricks-cdk"
-include = ["LICENSE"]
+keywords = [
+    "databricks",
+    "cdk",
+    "aws",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "pydantic>=1.4.0,<2",
+    "requests>=2.22",
+    "boto3>=1.21.10,<2",
+    "cfnresponse>=1.1.2,<2",
+    "tenacity>=8.2.2,<9",
+    "databricks-sdk>=0.13.0,<0.14",
+]
 
+[project.urls]
+Homepage = "https://github.com/RoyalFloraHolland/databricks-cdk"
+Repository = "https://github.com/RoyalFloraHolland/databricks-cdk"
+"npm package" = "https://www.npmjs.com/package/databricks-cdk"
+"Docker image" = "https://hub.docker.com/r/floriday/databricks-cdk-lambda"
 
-packages = [{ include = "databricks_cdk", from = "src" }]
+[dependency-groups]
+dev = [
+    "coverage[toml]>=7.6,<8",
+    "pytest>=8.3,<9",
+    "pytest-mock>=3.14,<4",
+    "pytest-cov>=5.0,<6",
+    { include-group = "dev-tools" },
+]
+dev-tools = [
+    "pyproject-flake8>=7.0,<8",
+    "isort>=5.13,<6",
+    "black>=24.8,<25",
+    "mypy>=1.11,<2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-pydantic = "^1.4.0"
-requests = ">=2.22"
-boto3 = "^1.21.10"
-cfnresponse = "^1.1.2"
-tenacity = "^8.2.2"
-databricks-sdk = "^0.13.0"
+[tool.hatch.build.targets.wheel]
+packages = ["src/databricks_cdk"]
 
-[tool.poetry.group.dev.dependencies]
-coverage = { version = "^7.6", extras = ["toml"] }
-pytest = "^8.3"
-pytest-mock = "^3.14"
-pyproject-flake8 = "^7.0"
-isort = "^5.13"
-black = "^24.8"
-pytest-cov = "^5.0"
-mypy = "^1.11"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 120
@@ -63,7 +82,3 @@ line_length = 120
 [tool.mypy]
 files = "src/"
 python_version = "3.12"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
