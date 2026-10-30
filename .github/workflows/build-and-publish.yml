@@ -17,7 +17,6 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}
-  cancel-in-progress: false
 
 env:
   IMAGE_NAME: databricks-cdk-lambda

@@ -1,10 +1,5 @@
 name: Set up uv
-description: Install uv and Python, with the uv cache keyed on aws-lambda/uv.lock.
-
-inputs:
-  python-version:
-    description: Python version to install
-    default: "3.12"
+description: Install uv, with the uv cache keyed on aws-lambda/uv.lock.
 
 runs:
   using: composite
@@ -14,5 +9,4 @@ runs:
       with:
         # Keep in sync with the uv image in aws-lambda/Dockerfile
         version: "0.13.6"
-        python-version: ${{ inputs.python-version }}
         cache-dependency-glob: aws-lambda/uv.lock

@@ -14,6 +14,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+defaults:
+  run:
+    working-directory: aws-lambda
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,24 +25,15 @@ jobs:
     permissions:
       contents: read
       checks: write # test report
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.12"]
-
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - name: Install uv
         uses: ./.github/actions/setup-uv
-        with:
-          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        working-directory: aws-lambda
         run: uv sync --locked
       - name: Test with pytest
-        working-directory: aws-lambda
         run: |
           uv run --locked coverage run -m pytest
           uv run --locked coverage report
@@ -63,10 +58,8 @@ jobs:
       - name: Install uv
         uses: ./.github/actions/setup-uv
       - name: Install dependencies
-        working-directory: aws-lambda
         run: uv sync --locked
       - name: Lint with flake8
-        working-directory: aws-lambda
         run: |
           # stop the build if there are Python syntax errors or undefined names
           uv run --locked pflake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -83,10 +76,8 @@ jobs:
       - name: Install uv
         uses: ./.github/actions/setup-uv
       - name: Install dependencies
-        working-directory: aws-lambda
         run: uv sync --locked
       - name: Lint with black
-        working-directory: aws-lambda
         run: |
           uv run --locked black --check .
 
@@ -100,9 +91,7 @@ jobs:
       - name: Install uv
         uses: ./.github/actions/setup-uv
       - name: Install dependencies
-        working-directory: aws-lambda
         run: uv sync --locked
       - name: Lint with isort
-        working-directory: aws-lambda
         run: |
           uv run --locked isort --check .
