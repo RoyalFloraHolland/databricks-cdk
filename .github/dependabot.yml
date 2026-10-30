@@ -4,16 +4,22 @@ updates:
   - package-ecosystem: "uv"
     directory: "/aws-lambda/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     cooldown:
       default-days: 7
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "npm"
     directory: "/typescript/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     cooldown:
       default-days: 7
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
 
   # The uv image in aws-lambda/Dockerfile (tag + digest)
   - package-ecosystem: "docker"
@@ -33,3 +39,6 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
