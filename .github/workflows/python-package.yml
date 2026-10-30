@@ -19,7 +19,7 @@ defaults:
     working-directory: aws-lambda
 
 jobs:
-  test:
+  pytest:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -95,3 +95,31 @@ jobs:
       - name: Lint with isort
         run: |
           uv run --locked isort --check .
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+      - name: Build image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: aws-lambda
+          platforms: linux/amd64
+          # AWS Lambda doesn't accept images with attestations
+          provenance: false
+          sbom: false
+          load: true
+          tags: databricks-cdk-lambda:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test
+        run: |
+          docker run --detach --publish 9000:8080 --env LAMBDA_METHOD=smoke-test databricks-cdk-lambda:test
+          response=$(curl --silent --retry 10 --retry-all-errors --retry-delay 1 \
+            --data '{}' http://localhost:9000/2015-03-31/functions/function/invocations)
+          echo "${response}"
+          grep --quiet "Lambda method does not exists: smoke-test" <<< "${response}"

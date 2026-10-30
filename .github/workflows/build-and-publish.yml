@@ -70,6 +70,7 @@ jobs:
           git commit -m "Bump version to ${NEW_VERSION}"
           git tag -a -m "Bump version to ${NEW_VERSION}" "v${NEW_VERSION}"
           echo "new-version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Push version bump and tag
         env:
@@ -86,16 +87,33 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB }}
 
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6.2.0
+        with:
+          images: floriday/${{ env.IMAGE_NAME }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=dev
+            type=raw,value=${{ steps.version.outputs.new-version }}
+          labels: |
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.version=${{ steps.version.outputs.new-version }}
+            org.opencontainers.image.revision=${{ steps.version.outputs.revision }}
+
       - name: Build and push Docker image
-        working-directory: aws-lambda
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new-version }}
-        run: |
-          docker build -t "${IMAGE_NAME}:dev" .
-          docker tag "${IMAGE_NAME}:dev" "floriday/${IMAGE_NAME}:dev"
-          docker tag "${IMAGE_NAME}:dev" "floriday/${IMAGE_NAME}:${NEW_VERSION}"
-          docker push "floriday/${IMAGE_NAME}:dev"
-          docker push "floriday/${IMAGE_NAME}:${NEW_VERSION}"
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: aws-lambda
+          platforms: linux/amd64
+          # AWS Lambda doesn't accept images with attestations
+          provenance: false
+          sbom: false
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Publish npm package
         working-directory: typescript
