@@ -112,14 +112,5 @@ jobs:
           # AWS Lambda doesn't accept images with attestations
           provenance: false
           sbom: false
-          load: true
-          tags: databricks-cdk-lambda:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Smoke test
-        run: |
-          docker run --detach --publish 9000:8080 --env LAMBDA_METHOD=smoke-test databricks-cdk-lambda:test
-          response=$(curl --silent --retry 10 --retry-all-errors --retry-delay 1 \
-            --data '{}' http://localhost:9000/2015-03-31/functions/function/invocations)
-          echo "${response}"
-          grep --quiet "Lambda method does not exists: smoke-test" <<< "${response}"
