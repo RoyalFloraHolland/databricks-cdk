@@ -30,7 +30,7 @@ pytest-mock = "^3.14"
 pyproject-flake8 = "^7.0"
 isort = "^5.13"
 black = "^24.8"
-pytest-cov = "^5.0"
+pytest-cov = ">=5,<8"
 mypy = "^1.11"
 
 [tool.black]
