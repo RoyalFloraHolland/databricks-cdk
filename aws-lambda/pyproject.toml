@@ -20,7 +20,7 @@ dependencies = [
     "requests>=2.22",
     "boto3>=1.21.10,<2",
     "cfnresponse>=1.1.2,<2",
-    "tenacity>=8.2.2,<9",
+    "tenacity>=8.2.2,<10",
     "databricks-sdk>=0.13.0,<0.14",
 ]
 
