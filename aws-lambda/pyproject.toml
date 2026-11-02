@@ -41,7 +41,7 @@ dev = [
 dev-tools = [
     "pyproject-flake8>=7.0,<8",
     "isort>=5.13,<6",
-    "black>=24.8,<25",
+    "black>=24.8,<27",
     "mypy>=1.11,<2",
 ]
 
