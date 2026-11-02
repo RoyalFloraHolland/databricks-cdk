@@ -35,7 +35,7 @@ dev = [
     "coverage[toml]>=7.6,<8",
     "pytest>=8.3,<9",
     "pytest-mock>=3.14,<4",
-    "pytest-cov>=5.0,<6",
+    "pytest-cov>=5.0,<8",
     { include-group = "dev-tools" },
 ]
 dev-tools = [
