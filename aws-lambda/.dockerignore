@@ -1,0 +1,8 @@
+.venv/
+.pytest_cache/
+.mypy_cache/
+.coverage
+junit/
+dist/
+tests/
+**/__pycache__/

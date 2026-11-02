@@ -1,0 +1,12 @@
+name: Set up uv
+description: Install uv, with the uv cache keyed on aws-lambda/uv.lock.
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+      with:
+        # Keep in sync with the uv image in aws-lambda/Dockerfile
+        version: "0.13.6"
+        cache-dependency-glob: aws-lambda/uv.lock

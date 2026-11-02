@@ -2,62 +2,82 @@ name: Npm package
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   linting:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - name: Install dependencies
+    timeout-minutes: 10
+    defaults:
+      run:
         working-directory: typescript
-        run: |
-          npm ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - name: Install dependencies
+        run: npm ci
       - name: Run eslint
-        working-directory: typescript
-        run: |
-          npm run lint
-  test:
+        run: npm run lint
+
+  jest:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: typescript
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          node-version: 18
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
       - name: Install dependencies
-        working-directory: typescript
-        run: |
-          npm ci
+        run: npm ci
       - name: Run tests
-        working-directory: typescript
-        run: |
-          npm run test
+        run: npm run test
+
   example-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         example-name: ["simple-workspace", "multi-stack"]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - name: Install dependencies
+    defaults:
+      run:
         working-directory: examples/${{ matrix.example-name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: examples/${{ matrix.example-name }}/package-lock.json
+      - name: Install dependencies
         run: |
           npm install aws-cdk
           npm ci
       - name: Run eslint
-        working-directory: examples/${{ matrix.example-name }}
-        run: |
-          npm run lint
+        run: npm run lint
       - name: Run cdk synth
-        working-directory: examples/${{ matrix.example-name }}
-        run: |
-          npm run cdk synth
+        run: npm run cdk synth
