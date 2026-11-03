@@ -224,4 +224,4 @@ def test_get_job_by_id_raises_on_other_bad_request(patched_get_request):
     patched_get_request.side_effect = HTTPError(response=MagicMock(status_code=400, text="Invalid job_id"))
 
     with pytest.raises(HTTPError):
-        get_job_by_id("2026/10/28/[$LATEST]abc", "https://test.cloud.databricks.com")
+        get_job_by_id("2024/01/01/[$LATEST]0123456789abcdef", "https://test.cloud.databricks.com")

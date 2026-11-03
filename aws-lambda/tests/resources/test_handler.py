@@ -21,14 +21,14 @@ def _event(request_type: str, physical_resource_id: str | None = None) -> dict:
 @patch("databricks_cdk.resources.handler.process_event")
 def test_handler_failed_update_keeps_physical_resource_id(patched_process_event, patched_send):
     patched_process_event.side_effect = RuntimeError("429 Too Many Requests")
-    event = _event("Update", physical_resource_id="117016152825745")
-    context = MagicMock(log_stream_name="2026/10/28/[$LATEST]113e60a8a7f84f7981a641ed8cb49058")
+    event = _event("Update", physical_resource_id="123456789")
+    context = MagicMock(log_stream_name="2024/01/01/[$LATEST]0123456789abcdef")
 
     handler(event, context)
 
     patched_send.assert_called_once()
     assert patched_send.call_args.args[2] == cfnresponse.FAILED
-    assert patched_send.call_args.kwargs["physicalResourceId"] == "117016152825745"
+    assert patched_send.call_args.kwargs["physicalResourceId"] == "123456789"
     assert "429 Too Many Requests" in patched_send.call_args.kwargs["reason"]
 
 
