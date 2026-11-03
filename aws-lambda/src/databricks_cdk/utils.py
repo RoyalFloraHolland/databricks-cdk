@@ -140,7 +140,7 @@ def put_request(
     return _do_request(method="PUT", url=url, body=body, params=params)
 
 
-def patch_request(url: str, body: dict, params: dict = None) -> dict:
+def patch_request(url: str, body: dict, params: dict | None = None) -> dict:
     """Generic method to do patch requests"""
 
     return _do_request(method="PATCH", url=url, body=body, params=params)

@@ -58,8 +58,8 @@ def test_get_assignment_dict_from_privilege_assignments_empty():
 
 
 def test_get_permission_changes_assignments_changed():
-    assignments_on_databricks_dict = {"principal": list(tuple([Privilege.APPLY_TAG, Privilege.WRITE_FILES]))}
-    assignments_from_properties_dict = {"principal": list(tuple([Privilege.APPLY_TAG, Privilege.READ_FILES]))}
+    assignments_on_databricks_dict = {"principal": [Privilege.APPLY_TAG, Privilege.WRITE_FILES]}
+    assignments_from_properties_dict = {"principal": [Privilege.APPLY_TAG, Privilege.READ_FILES]}
 
     result = get_permission_changes_assignments_changed(
         assignments_on_databricks_dict, assignments_from_properties_dict
@@ -72,8 +72,8 @@ def test_get_permission_changes_assignments_changed():
 
 
 def test_get_permission_changes_assignments_changed_no_changes():
-    assignments_on_databricks_dict = {"principal": list(tuple([Privilege.APPLY_TAG, Privilege.WRITE_FILES]))}
-    assignments_from_properties_dict = {"principal": list(tuple([Privilege.APPLY_TAG, Privilege.WRITE_FILES]))}
+    assignments_on_databricks_dict = {"principal": [Privilege.APPLY_TAG, Privilege.WRITE_FILES]}
+    assignments_from_properties_dict = {"principal": [Privilege.APPLY_TAG, Privilege.WRITE_FILES]}
 
     result = get_permission_changes_assignments_changed(
         assignments_on_databricks_dict, assignments_from_properties_dict
@@ -85,12 +85,12 @@ def test_get_permission_changes_assignments_changed_no_changes():
 
 def test_get_permission_changes_new_principals():
     assignments_on_databricks_dict = {
-        "principal_to_remove": list(tuple([Privilege.APPLY_TAG])),
-        "principal_to_stay": list(tuple([Privilege.APPLY_TAG])),
+        "principal_to_remove": [Privilege.APPLY_TAG],
+        "principal_to_stay": [Privilege.APPLY_TAG],
     }
     assignments_from_properties_dict = {
-        "principal_to_add": list(tuple([Privilege.APPLY_TAG])),
-        "principal_to_stay": list(tuple([Privilege.APPLY_TAG])),
+        "principal_to_add": [Privilege.APPLY_TAG],
+        "principal_to_stay": [Privilege.APPLY_TAG],
     }
 
     result = get_permission_changes_principals(assignments_on_databricks_dict, assignments_from_properties_dict)

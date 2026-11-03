@@ -41,8 +41,8 @@ class PermissionsResponse(CnfResponse):
 
 def create_diff(current: PermissionsList, new: PermissionsList) -> PermissionsDiff:
     changes = []
-    current_principals: dict[str, Permissions] = dict([(x.principal, x) for x in current.privilege_assignments])
-    new_principals: dict[str, Permissions] = dict([(x.principal, x) for x in new.privilege_assignments])
+    current_principals: dict[str, Permissions] = {x.principal: x for x in current.privilege_assignments}
+    new_principals: dict[str, Permissions] = {x.principal: x for x in new.privilege_assignments}
     all_principals: set[str] = set(current_principals.keys()).union(new_principals.keys())
 
     for principal in all_principals:
