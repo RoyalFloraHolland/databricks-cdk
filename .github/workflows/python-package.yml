@@ -48,7 +48,7 @@ jobs:
         with:
           files: ./aws-lambda/coverage.xml
 
-  flake8:
+  linting:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -59,42 +59,10 @@ jobs:
         uses: ./.github/actions/setup-uv
       - name: Install dependencies
         run: uv sync --locked
-      - name: Lint with flake8
+      - name: Lint with ruff
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          uv run --locked pflake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          uv run --locked pflake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-  black:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Install uv
-        uses: ./.github/actions/setup-uv
-      - name: Install dependencies
-        run: uv sync --locked
-      - name: Lint with black
-        run: |
-          uv run --locked black --check .
-
-  isort:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Install uv
-        uses: ./.github/actions/setup-uv
-      - name: Install dependencies
-        run: uv sync --locked
-      - name: Lint with isort
-        run: |
-          uv run --locked isort --check .
+          uv run --locked ruff format --check --output-format=github
+          uv run --locked ruff check --output-format=github
 
   docker:
     runs-on: ubuntu-latest
