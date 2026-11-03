@@ -19,4 +19,12 @@ hooks = [
         types = ["ts"],
         pass_filenames = false,
     },
+    {
+        id = "run-tests",
+        name = "run tests",
+        language = "system",
+        entry = "npm run test",
+        types = ["ts"],
+        pass_filenames = false,
+    },
 ]
