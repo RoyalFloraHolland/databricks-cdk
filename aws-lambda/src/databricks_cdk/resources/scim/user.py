@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -24,7 +23,7 @@ def get_user_url(workspace_url: str):
     return f"{workspace_url}/api/2.0/preview/scim/v2/Users"
 
 
-def get_user_by_user_name(user_name: str, workspace_url: str) -> Optional[dict]:
+def get_user_by_user_name(user_name: str, workspace_url: str) -> dict | None:
     """Getting user based on user_name"""
     get_response = get_request(
         url=f"{get_user_url(workspace_url)}",

@@ -11,12 +11,10 @@ from databricks_cdk.resources.permissions.changes import (
 
 def test_get_assignment_dict_from_permissions_list():
     permissions_list = PermissionsList(
-        **{
-            "privilege_assignments": [
-                PrivilegeAssignment(**{"principal": "principal1", "privileges": ["APPLY_TAG", "WRITE_FILES"]}),
-                PrivilegeAssignment(**{"principal": "principal2", "privileges": ["READ_FILES"]}),
-            ]
-        }
+        privilege_assignments=[
+            PrivilegeAssignment(principal="principal1", privileges=["APPLY_TAG", "WRITE_FILES"]),
+            PrivilegeAssignment(principal="principal2", privileges=["READ_FILES"]),
+        ]
     )
 
     result = get_assignment_dict_from_permissions_list(permissions_list)
@@ -28,7 +26,7 @@ def test_get_assignment_dict_from_permissions_list():
 
 
 def test_get_assignment_dict_from_permissions_list_empty():
-    permissions_list = PermissionsList(**{"privilege_assignments": None})
+    permissions_list = PermissionsList(privilege_assignments=None)
 
     result = get_assignment_dict_from_permissions_list(permissions_list)
 
@@ -37,8 +35,8 @@ def test_get_assignment_dict_from_permissions_list_empty():
 
 def test_get_assignment_dict_from_privilege_assignments():
     privilege_assignments = [
-        PrivilegeAssignment(**{"principal": "principal1", "privileges": [Privilege.APPLY_TAG, Privilege.WRITE_FILES]}),
-        PrivilegeAssignment(**{"principal": "principal2", "privileges": [Privilege.READ_FILES]}),
+        PrivilegeAssignment(principal="principal1", privileges=[Privilege.APPLY_TAG, Privilege.WRITE_FILES]),
+        PrivilegeAssignment(principal="principal2", privileges=[Privilege.READ_FILES]),
     ]
 
     result = get_assignment_dict_from_privilege_assignments(privilege_assignments)
@@ -51,8 +49,8 @@ def test_get_assignment_dict_from_privilege_assignments():
 
 def test_get_assignment_dict_from_privilege_assignments_empty():
     privilege_assignments = [
-        PrivilegeAssignment(**{"principal": "principal1", "privileges": None}),
-        PrivilegeAssignment(**{"principal": None, "privileges": [Privilege.READ_FILES]}),
+        PrivilegeAssignment(principal="principal1", privileges=None),
+        PrivilegeAssignment(principal=None, privileges=[Privilege.READ_FILES]),
     ]
     result = get_assignment_dict_from_privilege_assignments(privilege_assignments)
 

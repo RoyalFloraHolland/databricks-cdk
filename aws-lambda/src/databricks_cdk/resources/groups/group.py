@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -20,7 +19,7 @@ class GroupProperties(BaseModel):
     action: str = "group"
     workspace_url: str
     group_name: str
-    members: List[Union[UserMember, GroupMembers]]
+    members: list[UserMember | GroupMembers]
 
 
 class GroupResponse(CnfResponse):
@@ -32,7 +31,7 @@ def get_groups_url(workspace_url: str):
     return f"{workspace_url}/api/2.0/groups"
 
 
-def get_current_group_members(group_name: str, workspace_url: str) -> Optional[GroupProperties]:
+def get_current_group_members(group_name: str, workspace_url: str) -> GroupProperties | None:
     """Return current members of a group, returns None is group does not exist"""
     body = {"group_name": group_name}
     response = get_request(f"{get_groups_url(workspace_url)}/list-members", body=body)

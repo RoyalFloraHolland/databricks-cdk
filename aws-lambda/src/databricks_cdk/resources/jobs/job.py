@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict, List, Optional, Union
 
 import requests
 from pydantic import BaseModel, root_validator, validator
@@ -11,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class JobEmailNotifications(BaseModel):
-    on_start: List[str] = []
-    on_success: List[str] = []
-    on_failure: List[str] = []
+    on_start: list[str] = []
+    on_success: list[str] = []
+    on_failure: list[str] = []
     no_alert_for_skipped_runs: bool = False
 
 
@@ -23,16 +22,16 @@ class AutoScale(BaseModel):
 
 
 class AwsAttributes(BaseModel):
-    first_on_demand: Optional[int] = None
-    availability: Optional[str] = None
-    zone_id: Optional[str] = None
-    instance_profile_arn: Optional[str] = None
-    spot_bid_price_percent: Optional[int] = None
-    ebs_volume_type: Optional[str] = None
-    ebs_volume_count: Optional[int] = None
-    ebs_volume_size: Optional[int] = None
-    ebs_volume_iops: Optional[int] = None
-    ebs_volume_throughput: Optional[int] = None
+    first_on_demand: int | None = None
+    availability: str | None = None
+    zone_id: str | None = None
+    instance_profile_arn: str | None = None
+    spot_bid_price_percent: int | None = None
+    ebs_volume_type: str | None = None
+    ebs_volume_count: int | None = None
+    ebs_volume_size: int | None = None
+    ebs_volume_iops: int | None = None
+    ebs_volume_throughput: int | None = None
 
 
 class DockerBasicAuth(BaseModel):
@@ -42,28 +41,28 @@ class DockerBasicAuth(BaseModel):
 
 class DockerImage(BaseModel):
     url: str
-    basic_auth: Optional[DockerBasicAuth]
+    basic_auth: DockerBasicAuth | None
 
 
 class NewCluster(BaseModel):
-    num_workers: Optional[int] = None
-    autoscale: Optional[AutoScale] = None
+    num_workers: int | None = None
+    autoscale: AutoScale | None = None
     spark_version: str
-    docker_image: Optional[DockerImage] = None
-    spark_conf: Dict[str, str] = {}
+    docker_image: DockerImage | None = None
+    spark_conf: dict[str, str] = {}
     aws_attributes: AwsAttributes
-    node_type_id: Optional[str] = None
-    driver_node_type_id: Optional[str] = None
-    ssh_public_keys: List[str] = []
-    custom_tags: Optional[dict] = None
-    cluster_log_conf: Optional[dict] = None
-    init_scripts: List[dict] = []
-    spark_env_vars: Dict[str, str] = {}
-    enable_elastic_disk: Optional[bool] = None
-    driver_instance_pool_id: Optional[str] = None
-    instance_pool_id: Optional[str] = None
-    data_security_mode: Optional[str] = None
-    runtime_engine: Optional[str] = None
+    node_type_id: str | None = None
+    driver_node_type_id: str | None = None
+    ssh_public_keys: list[str] = []
+    custom_tags: dict | None = None
+    cluster_log_conf: dict | None = None
+    init_scripts: list[dict] = []
+    spark_env_vars: dict[str, str] = {}
+    enable_elastic_disk: bool | None = None
+    driver_instance_pool_id: str | None = None
+    instance_pool_id: str | None = None
+    data_security_mode: str | None = None
+    runtime_engine: str | None = None
 
 
 class JobCluster(BaseModel):
@@ -78,16 +77,16 @@ class NotebookTask(BaseModel):
 
 class SparkJarTask(BaseModel):
     main_class_name: str
-    parameters: List[str] = []
+    parameters: list[str] = []
 
 
 class SparkPythonTask(BaseModel):
     python_file: str
-    parameters: List[str] = []
+    parameters: list[str] = []
 
 
 class SparkSubmitTask(BaseModel):
-    parameters: List[str] = []
+    parameters: list[str] = []
 
 
 class PipelineTask(BaseModel):
@@ -96,17 +95,17 @@ class PipelineTask(BaseModel):
 
 class PythonWheelTask(BaseModel):
     package_name: str
-    entry_point: Optional[str] = None
-    parameters: List[str] = []
+    entry_point: str | None = None
+    parameters: list[str] = []
 
 
 class Library(BaseModel):
-    jar: Optional[str] = None
-    egg: Optional[str] = None
-    whl: Optional[str] = None
-    pypi: Optional[str] = None
-    maven: Optional[str] = None
-    cran: Optional[str] = None
+    jar: str | None = None
+    egg: str | None = None
+    whl: str | None = None
+    pypi: str | None = None
+    maven: str | None = None
+    cran: str | None = None
 
 
 class RunJobTask(BaseModel):
@@ -116,8 +115,8 @@ class RunJobTask(BaseModel):
     """
 
     job_id: int
-    job_parameters: Optional[Dict[str, str]] = None
-    python_params: Optional[List[str]] = None
+    job_parameters: dict[str, str] | None = None
+    python_params: list[str] | None = None
 
 
 class ConditionTask(BaseModel):
@@ -136,7 +135,7 @@ class TaskDependency(BaseModel):
 
     task_key: str
     # "true" or "false": the branch of a condition_task this task runs on
-    outcome: Optional[str] = None
+    outcome: str | None = None
 
 
 # Task and job fields that are only sent when set, so the body of jobs that don't use them is unchanged
@@ -146,25 +145,25 @@ OPTIONAL_JOB_FIELDS = {"trigger", "description", "queue", "parameters", "tags"}
 
 class JobTaskSettings(BaseModel):
     task_key: str
-    description: Optional[str] = None
-    depends_on: List[TaskDependency] = []
-    run_if: Optional[str] = None
-    existing_cluster_id: Optional[str] = None
-    new_cluster: Optional[NewCluster] = None
-    job_cluster_key: Optional[str] = None
-    notebook_task: Optional[NotebookTask] = None
-    spark_jar_task: Optional[SparkJarTask] = None
-    spark_python_task: Optional[SparkPythonTask] = None
-    spark_submit_task: Optional[SparkSubmitTask] = None
-    pipeline_task: Optional[PipelineTask] = None
-    python_wheel_task: Optional[PythonWheelTask] = None
-    run_job_task: Optional[RunJobTask] = None
-    condition_task: Optional[ConditionTask] = None
-    libraries: List[Library] = []
-    email_notifications: Optional[JobEmailNotifications] = None
-    timeout_seconds: Optional[int] = None
-    max_retries: Optional[int] = None
-    min_retry_interval_millis: Optional[int] = None
+    description: str | None = None
+    depends_on: list[TaskDependency] = []
+    run_if: str | None = None
+    existing_cluster_id: str | None = None
+    new_cluster: NewCluster | None = None
+    job_cluster_key: str | None = None
+    notebook_task: NotebookTask | None = None
+    spark_jar_task: SparkJarTask | None = None
+    spark_python_task: SparkPythonTask | None = None
+    spark_submit_task: SparkSubmitTask | None = None
+    pipeline_task: PipelineTask | None = None
+    python_wheel_task: PythonWheelTask | None = None
+    run_job_task: RunJobTask | None = None
+    condition_task: ConditionTask | None = None
+    libraries: list[Library] = []
+    email_notifications: JobEmailNotifications | None = None
+    timeout_seconds: int | None = None
+    max_retries: int | None = None
+    min_retry_interval_millis: int | None = None
     retry_on_timeout: bool = False
 
     @validator("depends_on", pre=True, each_item=True)
@@ -174,9 +173,9 @@ class JobTaskSettings(BaseModel):
 
 
 class CronSchedule(BaseModel):
-    quartz_cron_expression: Optional[str] = None
-    timezone_id: Optional[str] = None
-    pause_status: Optional[str] = None
+    quartz_cron_expression: str | None = None
+    timezone_id: str | None = None
+    pause_status: str | None = None
 
 
 class FileArrivalTriggerConfiguration(BaseModel):
@@ -186,8 +185,8 @@ class FileArrivalTriggerConfiguration(BaseModel):
     """
 
     url: str
-    min_time_between_triggers_seconds: Optional[int] = None
-    wait_after_last_change_seconds: Optional[int] = None
+    min_time_between_triggers_seconds: int | None = None
+    wait_after_last_change_seconds: int | None = None
 
 
 class TableUpdateTriggerConfiguration(BaseModel):
@@ -196,10 +195,10 @@ class TableUpdateTriggerConfiguration(BaseModel):
     API: `trigger.table_update` in https://docs.databricks.com/api/workspace/jobs/create
     """
 
-    table_names: List[str]
-    condition: Optional[str] = None
-    min_time_between_triggers_seconds: Optional[int] = None
-    wait_after_last_change_seconds: Optional[int] = None
+    table_names: list[str]
+    condition: str | None = None
+    min_time_between_triggers_seconds: int | None = None
+    wait_after_last_change_seconds: int | None = None
 
 
 class TriggerSettings(BaseModel):
@@ -209,9 +208,9 @@ class TriggerSettings(BaseModel):
     Field docs are on the TypeScript interfaces in typescript/src/resources/jobs/job.ts.
     """
 
-    pause_status: Optional[str] = None
-    file_arrival: Optional[FileArrivalTriggerConfiguration] = None
-    table_update: Optional[TableUpdateTriggerConfiguration] = None
+    pause_status: str | None = None
+    file_arrival: FileArrivalTriggerConfiguration | None = None
+    table_update: TableUpdateTriggerConfiguration | None = None
 
     @root_validator(skip_on_failure=True)
     def check_one_trigger_type(cls, values: dict) -> dict:
@@ -245,20 +244,20 @@ class JobParameterDefinition(BaseModel):
 
 class JobSettings(BaseModel):
     name: str
-    description: Optional[str] = None
-    tasks: List[JobTaskSettings]
+    description: str | None = None
+    tasks: list[JobTaskSettings]
     # Empty for a job whose tasks only run other jobs
-    job_clusters: List[JobCluster] = []
-    email_notifications: Optional[JobEmailNotifications] = None
-    timeout_seconds: Optional[int] = None
-    schedule: Optional[CronSchedule]
-    trigger: Optional[TriggerSettings] = None
-    queue: Optional[QueueSettings] = None
-    parameters: Optional[List[JobParameterDefinition]] = None
-    tags: Optional[Dict[str, str]] = None
-    max_concurrent_runs: Optional[int] = None
+    job_clusters: list[JobCluster] = []
+    email_notifications: JobEmailNotifications | None = None
+    timeout_seconds: int | None = None
+    schedule: CronSchedule | None
+    trigger: TriggerSettings | None = None
+    queue: QueueSettings | None = None
+    parameters: list[JobParameterDefinition] | None = None
+    tags: dict[str, str] | None = None
+    max_concurrent_runs: int | None = None
     format: str = "MULTI_TASK"
-    access_control_list: Optional[List[Union[AccessControlRequestForUser, AccessControlRequestForGroup]]] = None
+    access_control_list: list[AccessControlRequestForUser | AccessControlRequestForGroup] | None = None
 
 
 class JobProperties(BaseModel):
@@ -312,9 +311,9 @@ def job_settings_body(job: JobSettings) -> dict:
     return body
 
 
-def create_or_update_job(properties: JobProperties, physical_resource_id: Optional[str]) -> JobResponse:
+def create_or_update_job(properties: JobProperties, physical_resource_id: str | None) -> JobResponse:
     """Create job at databricks"""
-    current: Optional[dict] = None
+    current: dict | None = None
     url = get_job_url(properties.workspace_url)
     if physical_resource_id is not None:
         current = get_job_by_id(physical_resource_id, properties.workspace_url)

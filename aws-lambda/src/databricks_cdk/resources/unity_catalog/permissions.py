@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict, List, Set
 
 from pydantic import BaseModel
 
@@ -11,21 +10,21 @@ logger = logging.getLogger(__name__)
 
 class Permissions(BaseModel):
     principal: str
-    privileges: List[str]
+    privileges: list[str]
 
 
 class PermissionsList(BaseModel):
-    privilege_assignments: List[Permissions] = []
+    privilege_assignments: list[Permissions] = []
 
 
 class PermissionDiff(BaseModel):
     principal: str
-    add: List[str] = []
-    remove: List[str] = []
+    add: list[str] = []
+    remove: list[str] = []
 
 
 class PermissionsDiff(BaseModel):
-    changes: List[PermissionDiff]
+    changes: list[PermissionDiff]
 
 
 class PermissionsProperties(BaseModel):
@@ -42,9 +41,9 @@ class PermissionsResponse(CnfResponse):
 
 def create_diff(current: PermissionsList, new: PermissionsList) -> PermissionsDiff:
     changes = []
-    current_principals: Dict[str, Permissions] = dict([(x.principal, x) for x in current.privilege_assignments])
-    new_principals: Dict[str, Permissions] = dict([(x.principal, x) for x in new.privilege_assignments])
-    all_principals: Set[str] = set(current_principals.keys()).union(new_principals.keys())
+    current_principals: dict[str, Permissions] = dict([(x.principal, x) for x in current.privilege_assignments])
+    new_principals: dict[str, Permissions] = dict([(x.principal, x) for x in new.privilege_assignments])
+    all_principals: set[str] = set(current_principals.keys()).union(new_principals.keys())
 
     for principal in all_principals:
         change = PermissionDiff(principal=principal)

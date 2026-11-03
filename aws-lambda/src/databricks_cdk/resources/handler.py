@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import cfnresponse
 from pydantic import BaseModel, ValidationError
@@ -143,7 +142,7 @@ logger = logging.getLogger(__name__)
 class DatabricksEvent(BaseModel):
     RequestType: str
     ResourceProperties: dict
-    PhysicalResourceId: Optional[str] = None
+    PhysicalResourceId: str | None = None
 
     def action(self):
         return self.ResourceProperties.get("action")

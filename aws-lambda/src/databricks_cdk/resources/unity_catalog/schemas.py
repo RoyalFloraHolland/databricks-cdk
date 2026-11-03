@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
@@ -12,9 +11,9 @@ logger = logging.getLogger(__name__)
 class Schema(BaseModel):
     name: str
     catalog_name: str
-    comment: Optional[str]
-    properties: Dict[str, str] = {}
-    owner: Optional[str]
+    comment: str | None
+    properties: dict[str, str] = {}
+    owner: str | None
 
 
 class SchemaProperties(BaseModel):
@@ -32,7 +31,7 @@ def get_schema_url(workspace_url: str):
     return f"{workspace_url}/api/2.1/unity-catalog/schemas"
 
 
-def get_schema_by_name(catalog_name: str, schema_name: str, base_url: str) -> Optional[dict]:
+def get_schema_by_name(catalog_name: str, schema_name: str, base_url: str) -> dict | None:
     try:
         return get_request(f"{base_url}/{catalog_name}.{schema_name}")
     except Exception as e:
@@ -42,7 +41,7 @@ def get_schema_by_name(catalog_name: str, schema_name: str, base_url: str) -> Op
 
 def create_or_update_schema(properties: SchemaProperties) -> SchemaResponse:
     """Create schema at databricks"""
-    current: Optional[dict] = None
+    current: dict | None = None
     base_url = get_schema_url(properties.workspace_url)
     if current is None:
         current = get_schema_by_name(

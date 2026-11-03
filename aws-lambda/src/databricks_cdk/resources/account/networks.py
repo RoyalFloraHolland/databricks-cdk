@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -19,8 +18,8 @@ class NetworksProperties(BaseModel):
     action: str = "networks"
     network_name: str
     vpc_id: str
-    subnet_ids: List[str]
-    security_group_ids: List[str]
+    subnet_ids: list[str]
+    security_group_ids: list[str]
     # vpc_endpoints: dict  # TODO: no need directly
 
 
@@ -28,8 +27,8 @@ class NetworksResponse(CnfResponse):
     network_name: str
     network_id: str
     vpc_id: str
-    subnet_ids: List[str]
-    security_group_ids: List[str]
+    subnet_ids: list[str]
+    security_group_ids: list[str]
     creation_time: int
 
 
@@ -41,13 +40,13 @@ def get_networks_url():
     return f"{ACCOUNTS_BASE_URL}/api/2.0/accounts/{account_id}/networks"
 
 
-def get_network_by_id(network_id: str) -> Optional[dict]:
+def get_network_by_id(network_id: str) -> dict | None:
     """Getting network based on id"""
     url = get_networks_url()
     return get_request(url=f"{url}/{network_id}")
 
 
-def get_network_by_name(network_name: str) -> Optional[dict]:
+def get_network_by_name(network_name: str) -> dict | None:
     """Getting network based on name"""
     url = get_networks_url()
     get_response = get_request(url=url)
@@ -64,7 +63,6 @@ def create_or_update_networks(properties: NetworksProperties) -> NetworksRespons
 
     current = get_network_by_name(properties.network_name)
     if current is None:
-
         # Json data
         body = {
             "network_name": properties.network_name,

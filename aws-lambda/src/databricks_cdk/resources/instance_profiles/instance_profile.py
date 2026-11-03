@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -21,7 +20,7 @@ def get_instance_profile_url(workspace_url: str):
     return f"{workspace_url}/api/2.0/instance-profiles"
 
 
-def get_instance_profile_by_arn(instance_profile_arn: str, workspace_url: str) -> Optional[dict]:
+def get_instance_profile_by_arn(instance_profile_arn: str, workspace_url: str) -> dict | None:
     """Getting instance_profile based on arn"""
     get_response = get_request(url=f"{get_instance_profile_url(workspace_url)}/list")
     if "instance_profiles" in get_response:
@@ -38,7 +37,6 @@ def create_or_update_instance_profile(
 
     current = get_instance_profile_by_arn(properties.instance_profile_arn, properties.workspace_url)
     if current is None:
-
         # Json data
         body = {
             "instance_profile_arn": properties.instance_profile_arn,

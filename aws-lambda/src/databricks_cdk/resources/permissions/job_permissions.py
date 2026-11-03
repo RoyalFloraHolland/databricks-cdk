@@ -1,5 +1,3 @@
-from typing import List, Union
-
 from pydantic import BaseModel
 
 from databricks_cdk.resources.permissions.models import (
@@ -16,8 +14,8 @@ class JobPermissionsProperties(BaseModel):
     action: str = "job-permissions"
     workspace_url: str
     job_id: str
-    access_control_list: List[Union[UserPermission, GroupPermission, ServicePrincipalPermission]] = []
-    owner: Union[User, ServicePrincipal]
+    access_control_list: list[UserPermission | GroupPermission | ServicePrincipalPermission] = []
+    owner: User | ServicePrincipal
 
 
 def get_job_permissions_url(workspace_url: str, job_id: str):

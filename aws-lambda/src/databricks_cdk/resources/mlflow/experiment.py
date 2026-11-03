@@ -1,5 +1,3 @@
-from typing import Optional
-
 from databricks.sdk.service.ml import ExperimentTag
 from pydantic import BaseModel
 
@@ -12,9 +10,9 @@ class ExperimentIdNoneError(Exception):
 
 class ExperimentProperties(BaseModel):
     name: str
-    artifact_location: Optional[str] = None
+    artifact_location: str | None = None
     workspace_url: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class ExperimentCreateResponse(CnfResponse):
@@ -22,7 +20,7 @@ class ExperimentCreateResponse(CnfResponse):
     name: str
 
 
-def create_or_update_experiment(properties: ExperimentProperties, physical_resource_id: Optional[str] = None):
+def create_or_update_experiment(properties: ExperimentProperties, physical_resource_id: str | None = None):
     """
     Creates a new experiment if there is no physical_resource_id provided, else it checks if based on the
     ExperimentProperties the experiment can be updated

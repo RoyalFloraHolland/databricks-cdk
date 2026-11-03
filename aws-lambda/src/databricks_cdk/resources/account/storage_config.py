@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -36,13 +35,13 @@ def get_storage_configuration_url():
     return f"{ACCOUNTS_BASE_URL}/api/2.0/accounts/{account_id}/storage-configurations"
 
 
-def get_storage_by_id(storage_configuration_id: str) -> Optional[dict]:
+def get_storage_by_id(storage_configuration_id: str) -> dict | None:
     """Get storage config based on id"""
     url = get_storage_configuration_url()
     return get_request(url=f"{url}/{storage_configuration_id}")
 
 
-def get_storage_by_name(storage_configuration_name: str) -> Optional[dict]:
+def get_storage_by_name(storage_configuration_name: str) -> dict | None:
     """Get storage config based on name"""
     url = get_storage_configuration_url()
     get_response = get_request(url=url)
@@ -61,7 +60,6 @@ def create_or_update_storage_configuration(
 
     current = get_storage_by_name(properties.storage_configuration_name)
     if current is None:
-
         # Json data
         body = {
             "storage_configuration_name": properties.storage_configuration_name,

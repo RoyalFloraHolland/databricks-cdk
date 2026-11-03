@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Optional
 
 import boto3
 from databricks.sdk import AccountClient
@@ -31,7 +30,7 @@ class ServicePrincipalSecretsResponse(CnfResponse):
 
 
 def create_or_update_service_principal_secrets(
-    properties: ServicePrincipalSecretsProperties, physical_resource_id: Optional[str] = None
+    properties: ServicePrincipalSecretsProperties, physical_resource_id: str | None = None
 ) -> ServicePrincipalSecretsResponse:
     """
     Create or update service principal secrets on databricks.
@@ -57,8 +56,7 @@ def get_service_principal_secrets(
     for secret_info in existing_service_principal_secrets:
         if secret_info is not None and secret_info.id == physical_resource_id:
             return secret_info
-    else:
-        raise NotFound(f"Service principal secrets with id {physical_resource_id} not found")
+    raise NotFound(f"Service principal secrets with id {physical_resource_id} not found")
 
 
 def create_service_principal_secrets(

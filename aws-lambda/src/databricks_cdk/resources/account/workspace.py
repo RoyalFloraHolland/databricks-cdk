@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -20,14 +19,14 @@ logger = logging.getLogger(__name__)
 class WorkspaceProperties(BaseModel):
     action: str = "workspaces"
     workspace_name: str
-    deployment_name: Optional[str] = None
+    deployment_name: str | None = None
     aws_region: str
     credentials_id: str
     storage_configuration_id: str
-    network_id: Optional[str] = None
-    managed_services_customer_managed_key_id: Optional[str] = None
-    pricing_tier: Optional[str] = None
-    storage_customer_managed_key_id: Optional[str] = None
+    network_id: str | None = None
+    managed_services_customer_managed_key_id: str | None = None
+    pricing_tier: str | None = None
+    storage_customer_managed_key_id: str | None = None
 
 
 class WorkspaceResponse(CnfResponse):
@@ -45,13 +44,13 @@ def get_workspaces_url():
     return f"{ACCOUNTS_BASE_URL}/api/2.0/accounts/{account_id}/workspaces"
 
 
-def get_workspace_by_id(workspace_id: str) -> Optional[dict]:
+def get_workspace_by_id(workspace_id: str) -> dict | None:
     """Getting workspace by name"""
     url = get_workspaces_url()
     return get_request(url=f"{url}/{workspace_id}")
 
 
-def get_workspace_by_name(workspace_name: str) -> Optional[dict]:
+def get_workspace_by_name(workspace_name: str) -> dict | None:
     """Getting workspace by name"""
     url = get_workspaces_url()
     get_response = get_request(url=url)
@@ -136,7 +135,7 @@ def wait_on_provioning(workspace_id: str):
     logger.info(f"Status of workspace is {response['workspace_status']}")
     if response["workspace_status"] != "RUNNING":
         raise RuntimeError(
-            f'Status of workspace is {response["workspace_status"]} with message: {response["workspace_status_message"]}'
+            f"Status of workspace is {response['workspace_status']} with message: {response['workspace_status_message']}"
         )
 
 

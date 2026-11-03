@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -28,7 +27,7 @@ class ServicePrincipalPermission(ServicePrincipal):
 class ExperimentPermissionProperties(BaseModel):
     action: str = "experiment-permission"
     experiment_id: str
-    access_control_list: List[Union[UserPermission, GroupPermission, ServicePrincipalPermission]]
+    access_control_list: list[UserPermission | GroupPermission | ServicePrincipalPermission]
     workspace_url: str
 
 

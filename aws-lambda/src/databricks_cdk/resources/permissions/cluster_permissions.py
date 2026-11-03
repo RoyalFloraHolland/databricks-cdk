@@ -1,5 +1,4 @@
 import logging
-from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -13,7 +12,7 @@ class ClusterPermissionsProperties(BaseModel):
     action: str = "cluster-permissions"
     workspace_url: str
     cluster_id: str
-    access_control_list: List[Union[UserPermission, GroupPermission, ServicePrincipalPermission]]
+    access_control_list: list[UserPermission | GroupPermission | ServicePrincipalPermission]
 
 
 def get_cluster_permissions_url(workspace_url: str, cluster_id: str):
