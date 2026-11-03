@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Union
 
 from pydantic import BaseModel
 
@@ -9,7 +8,7 @@ from databricks_cdk.utils import CnfResponse, get_request, post_request
 logger = logging.getLogger(__name__)
 
 
-Value = Union[int, bool, str]
+Value = int | bool | str
 
 
 class PolicyElement(BaseModel):

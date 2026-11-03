@@ -54,6 +54,11 @@ build-backend = "hatchling.build"
 line-length = 120
 target-version = "py312"
 
+[tool.ruff.lint]
+ignore = [
+    "BLE001",  # Do not catch blind exception: `Exception`
+]
+
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit/report.xml"
 testpaths = ["tests"]

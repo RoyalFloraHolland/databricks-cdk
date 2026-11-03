@@ -381,5 +381,5 @@ def handler(event, context):
             physicalResourceId=response_data.physical_resource_id,
         )
     except Exception as e:
-        logger.exception(e)
-        cfnresponse.send(event, context, cfnresponse.FAILED, None)
+        logger.exception("Last-resort exception handler hit.")
+        cfnresponse.send(event, context, cfnresponse.FAILED, None, reason=f"Uncaught exception: {e!s}")
