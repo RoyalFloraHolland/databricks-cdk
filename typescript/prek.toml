@@ -4,6 +4,14 @@
 repo = "local"
 hooks = [
     {
+        id = "compile-typescript",
+        name = "compile typescript",
+        language = "system",
+        entry = "npx tsc --noEmit",
+        types = ["ts"],
+        pass_filenames = false,
+    },
+    {
         id = "run-lint",
         name = "run linter",
         language = "system",
