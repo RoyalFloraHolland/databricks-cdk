@@ -1,7 +1,8 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from pydantic import ValidationError
+from requests.exceptions import HTTPError
 
 from databricks_cdk.resources.jobs.job import (
     AwsAttributes,
@@ -18,6 +19,7 @@ from databricks_cdk.resources.jobs.job import (
     TaskDependency,
     TriggerSettings,
     create_or_update_job,
+    get_job_by_id,
     job_settings_body,
 )
 
@@ -197,3 +199,29 @@ def test_create_or_update_job_resets_with_trigger(patched_get_job_by_id, patched
     assert url.endswith("/reset")
     assert body["job_id"] == 123
     assert body["new_settings"]["trigger"] == {"file_arrival": {"url": "/Volumes/catalog/schema/volume/"}}
+
+
+@patch("databricks_cdk.resources.jobs.job.get_request")
+def test_get_job_by_id_uses_get_request(patched_get_request):
+    # get_request retries on 429
+    patched_get_request.return_value = {"job_id": 123}
+
+    assert get_job_by_id("123", "https://test.cloud.databricks.com") == {"job_id": 123}
+    patched_get_request.assert_called_once_with(
+        "https://test.cloud.databricks.com/api/2.1/jobs/get", body={"job_id": "123"}
+    )
+
+
+@patch("databricks_cdk.resources.jobs.job.get_request")
+def test_get_job_by_id_returns_none_when_job_does_not_exist(patched_get_request):
+    patched_get_request.side_effect = HTTPError(response=MagicMock(status_code=400, text="Job 123 does not exist."))
+
+    assert get_job_by_id("123", "https://test.cloud.databricks.com") is None
+
+
+@patch("databricks_cdk.resources.jobs.job.get_request")
+def test_get_job_by_id_raises_on_other_bad_request(patched_get_request):
+    patched_get_request.side_effect = HTTPError(response=MagicMock(status_code=400, text="Invalid job_id"))
+
+    with pytest.raises(HTTPError):
+        get_job_by_id("2024/01/01/[$LATEST]0123456789abcdef", "https://test.cloud.databricks.com")

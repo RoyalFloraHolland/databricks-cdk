@@ -1,10 +1,10 @@
 import json
 import logging
 
-import requests
 from pydantic import BaseModel, root_validator, validator
+from requests.exceptions import HTTPError
 
-from databricks_cdk.utils import CnfResponse, get_authorization_headers, post_request
+from databricks_cdk.utils import CnfResponse, get_request, post_request
 
 logger = logging.getLogger(__name__)
 
@@ -275,17 +275,14 @@ def get_job_url(workspace_url: str):
     return f"{workspace_url}/api/2.1/jobs"
 
 
-def get_job_by_id(job_id: str, workspace_url: str):
-    body = {"job_id": job_id}
-    resp = requests.get(
-        f"{get_job_url(workspace_url)}/get",
-        json=body,
-        headers=get_authorization_headers(),
-    )
-    if resp.status_code == 400 and "does not exist" in resp.text:
-        return None
-    resp.raise_for_status()
-    return resp.json()
+def get_job_by_id(job_id: str, workspace_url: str) -> dict | None:
+    """Get a job by id, or None if it does not exist"""
+    try:
+        return get_request(f"{get_job_url(workspace_url)}/get", body={"job_id": job_id})
+    except HTTPError as e:
+        if e.response is not None and e.response.status_code == 400 and "does not exist" in e.response.text:
+            return None
+        raise
 
 
 def job_settings_body(job: JobSettings) -> dict:
