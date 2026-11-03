@@ -59,6 +59,13 @@ ignore = [
     "BLE001",  # Do not catch blind exception: `Exception`
 ]
 
+[tool.ty.terminal]
+output-format = "concise"
+error-on-warning = false
+
+[tool.ty.rules]
+all = "warn"  # Too much existing bagage to fix in one go
+
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit/report.xml"
 testpaths = ["tests"]
