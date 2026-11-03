@@ -1,12 +1,13 @@
 {
     "compilerOptions": {
-        "target": "ES2018",
+        "target": "es2022",
         "module": "commonjs",
         "esModuleInterop": true,
         "lib": [
-            "es2016",
-            "es2017.object",
-            "es2017.string"
+            "es2022"
+        ],
+        "types": [
+            "node"
         ],
         "declaration": true,
         "strict": true,
