@@ -79,4 +79,3 @@ export class ClusterPolicy extends CustomResource {
         return this.getAttString("physical_resource_id");
     }
 }
-

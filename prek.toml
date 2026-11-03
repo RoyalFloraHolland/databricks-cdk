@@ -8,4 +8,10 @@ hooks = [
     { id = "check-json" },
     { id = "check-toml" },
     { id = "check-yaml" },
+    { id = "end-of-file-fixer" },
+    { id = "mixed-line-ending" },
+    { id = "trailing-whitespace" },
 ]
+
+# Typescript checks are defined in typescript/prek.toml
+# Python checks are defined in aws-lambda/prek.toml

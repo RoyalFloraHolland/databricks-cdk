@@ -20,7 +20,7 @@ describe("RegisteredModel", () => {
 
         template.hasResourceProperties("AWS::CloudFormation::CustomResource",
             {
- 
+
                 "ServiceToken": "some-arn",
                 "action": "mlflow-registered-model",
                 "workspace_url": {
@@ -32,5 +32,3 @@ describe("RegisteredModel", () => {
             });
     });
 });
-            
-            
