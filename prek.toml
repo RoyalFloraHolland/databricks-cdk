@@ -1,0 +1,11 @@
+# $schema: https://www.schemastore.org/prek.json
+fail_fast = true
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "check-added-large-files" },
+    { id = "check-json" },
+    { id = "check-toml" },
+    { id = "check-yaml" },
+]
