@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -21,7 +20,7 @@ def get_secret_url(workspace_url: str):
     return f"{workspace_url}/api/2.0/secrets"
 
 
-def list_secrets(workspace_url: str, scope: str) -> Optional[List[dict]]:
+def list_secrets(workspace_url: str, scope: str) -> list[dict] | None:
     url = get_secret_url(workspace_url)
     response = get_request(f"{url}/list?scope={scope}")
     return response.get("secrets")

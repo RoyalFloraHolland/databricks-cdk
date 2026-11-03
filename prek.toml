@@ -1,0 +1,17 @@
+# $schema: https://www.schemastore.org/prek.json
+fail_fast = true
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "check-added-large-files" },
+    { id = "check-json" },
+    { id = "check-toml" },
+    { id = "check-yaml" },
+    { id = "end-of-file-fixer" },
+    { id = "mixed-line-ending" },
+    { id = "trailing-whitespace" },
+]
+
+# Typescript checks are defined in typescript/prek.toml
+# Python checks are defined in aws-lambda/prek.toml

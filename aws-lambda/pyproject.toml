@@ -39,10 +39,8 @@ dev = [
     { include-group = "dev-tools" },
 ]
 dev-tools = [
-    "pyproject-flake8>=7.0,<8",
-    "isort>=5.13,<6",
-    "black>=24.8,<27",
-    "mypy>=1.11,<2",
+    "ruff>=0.17.3",
+    "ty>=0.0.96",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -52,9 +50,21 @@ packages = ["src/databricks_cdk"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-target-version = ["py312"]
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = [
+    "BLE001",  # Do not catch blind exception: `Exception`
+]
+
+[tool.ty.terminal]
+output-format = "concise"
+error-on-warning = false
+
+[tool.ty.rules]
+all = "warn"  # Too much existing bagage to fix in one go
 
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit/report.xml"
@@ -69,16 +79,3 @@ show_missing = true
 [tool.coverage.run]
 command_line = "-m pytest -v tests/"
 omit = ["tests/*", ".venv/*"]
-
-[tool.flake8]
-max-line-length = 180
-extend-exclude = ["deploy", ".venv"]
-extend-ignore = "E203"
-
-[tool.isort]
-profile = "black"
-line_length = 120
-
-[tool.mypy]
-files = "src/"
-python_version = "3.12"

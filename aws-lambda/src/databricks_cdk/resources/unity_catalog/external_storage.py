@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ExternalLocation(BaseModel):
     name: str
-    comment: Optional[str]
+    comment: str | None
     url: str
     credential_name: str
     read_only: bool = False
@@ -31,7 +30,7 @@ def get_external_location_url(workspace_url: str) -> str:
     return f"{workspace_url}/api/2.1/unity-catalog/external-locations"
 
 
-def get_external_location_by_name(name: str, base_url: str) -> Optional[dict]:
+def get_external_location_by_name(name: str, base_url: str) -> dict | None:
     try:
         return get_request(f"{base_url}/{name}")
     except Exception as e:

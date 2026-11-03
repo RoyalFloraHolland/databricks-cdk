@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Metastore(BaseModel):
     name: str
     storage_root: str
-    owner: Optional[str]
+    owner: str | None
 
 
 class MetastoreProperties(BaseModel):
@@ -37,11 +36,11 @@ def get_metastore_url(workspace_url: str):
     return f"{workspace_url}/api/2.1/unity-catalog/metastores"
 
 
-def get_metastore_by_id(metastore_id: str, base_url: str) -> Optional[dict]:
+def get_metastore_by_id(metastore_id: str, base_url: str) -> dict | None:
     return get_request(f"{base_url}/{metastore_id}")
 
 
-def get_metastore_by_name(metastore_name: str, base_url: str) -> Optional[dict]:
+def get_metastore_by_name(metastore_name: str, base_url: str) -> dict | None:
     results = get_request(base_url).get("metastores", [])
     for m in results:
         if m.get("name") == metastore_name:
@@ -49,11 +48,9 @@ def get_metastore_by_name(metastore_name: str, base_url: str) -> Optional[dict]:
     return None
 
 
-def create_or_update_metastore(
-    properties: MetastoreProperties, physical_resource_id: Optional[str]
-) -> MetastoreResponse:
+def create_or_update_metastore(properties: MetastoreProperties, physical_resource_id: str | None) -> MetastoreResponse:
     """Create metastore at databricks"""
-    current: Optional[dict] = None
+    current: dict | None = None
     credential_result = create_or_update_storage_credential(
         StorageCredentialsProperties(
             workspace_url=properties.workspace_url,

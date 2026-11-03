@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -15,27 +14,27 @@ class DockerBasicAuth(BaseModel):
 
 class DockerImage(BaseModel):
     url: str
-    basic_auth: Optional[DockerBasicAuth]
+    basic_auth: DockerBasicAuth | None
 
 
 class InstancePoolAwsAttributes(BaseModel):
-    spot_bid_price_percent: Optional[int] = None
+    spot_bid_price_percent: int | None = None
     availability: str = "SPOT_WITH_FALLBACK"
-    zone_id: Optional[str] = None
+    zone_id: str | None = None
 
 
 class InstancePool(BaseModel):
     instance_pool_name: str
-    min_idle_instances: Optional[int] = None
-    max_capacity: Optional[int] = None
-    aws_attributes: Optional[InstancePoolAwsAttributes] = None
+    min_idle_instances: int | None = None
+    max_capacity: int | None = None
+    aws_attributes: InstancePoolAwsAttributes | None = None
     node_type_id: str
-    custom_tags: Optional[dict] = None
-    idle_instance_autotermination_minutes: Optional[int] = None
+    custom_tags: dict | None = None
+    idle_instance_autotermination_minutes: int | None = None
     enable_elastic_disk: bool = False
-    disk_spec: Optional[dict] = None
-    preloaded_spark_versions: List[str]
-    preloaded_docker_images: List[DockerImage] = []
+    disk_spec: dict | None = None
+    preloaded_spark_versions: list[str]
+    preloaded_docker_images: list[DockerImage] = []
 
 
 class InstancePoolProperties(BaseModel):
@@ -51,9 +50,9 @@ class InstancePoolResponse(CnfResponse):
 class InstancePoolEdit(BaseModel):
     instance_pool_id: str
     instance_pool_name: str
-    min_idle_instances: Optional[int]
-    max_capacity: Optional[int]
-    idle_instance_autotermination_minutes: Optional[int]
+    min_idle_instances: int | None
+    max_capacity: int | None
+    idle_instance_autotermination_minutes: int | None
 
 
 def get_instance_pools_url(workspace_url: str):
@@ -62,17 +61,17 @@ def get_instance_pools_url(workspace_url: str):
     return f"{workspace_url}/api/2.0/instance-pools"
 
 
-def get_instance_pool_by_id(instance_pool_id: str, workspace_url: str) -> Optional[dict]:
+def get_instance_pool_by_id(instance_pool_id: str, workspace_url: str) -> dict | None:
     """Getting instance_pool by id"""
     body = {"instance_pool_id": instance_pool_id}
 
     return get_request(f"{get_instance_pools_url(workspace_url=workspace_url)}/get", body=body)
 
 
-def create_or_update_instance_pool(properties: InstancePoolProperties, physical_resource_id: Optional[str]):
+def create_or_update_instance_pool(properties: InstancePoolProperties, physical_resource_id: str | None):
     """Create or update instance pool at Databricks"""
     url = get_instance_pools_url(properties.workspace_url)
-    current: Optional[dict] = None
+    current: dict | None = None
     instance_pool_properties = properties.instance_pool
 
     if physical_resource_id is not None:

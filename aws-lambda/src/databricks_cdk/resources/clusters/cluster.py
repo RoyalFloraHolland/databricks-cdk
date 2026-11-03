@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, List, Optional
 
 import requests
 from pydantic import BaseModel
@@ -15,16 +14,16 @@ class AutoScale(BaseModel):
 
 
 class AwsAttributes(BaseModel):
-    first_on_demand: Optional[int] = None
-    availability: Optional[str] = None
-    zone_id: Optional[str] = None
-    instance_profile_arn: Optional[str] = None
-    spot_bid_price_percent: Optional[int] = None
-    ebs_volume_type: Optional[str] = None
-    ebs_volume_count: Optional[int] = None
-    ebs_volume_size: Optional[int] = None
-    ebs_volume_iops: Optional[int] = None
-    ebs_volume_throughput: Optional[int] = None
+    first_on_demand: int | None = None
+    availability: str | None = None
+    zone_id: str | None = None
+    instance_profile_arn: str | None = None
+    spot_bid_price_percent: int | None = None
+    ebs_volume_type: str | None = None
+    ebs_volume_count: int | None = None
+    ebs_volume_size: int | None = None
+    ebs_volume_iops: int | None = None
+    ebs_volume_throughput: int | None = None
 
 
 class DockerBasicAuth(BaseModel):
@@ -34,33 +33,33 @@ class DockerBasicAuth(BaseModel):
 
 class DockerImage(BaseModel):
     url: str
-    basic_auth: Optional[DockerBasicAuth]
+    basic_auth: DockerBasicAuth | None
 
 
 class Cluster(BaseModel):
-    num_workers: Optional[int] = None
-    autoscale: Optional[AutoScale] = None
+    num_workers: int | None = None
+    autoscale: AutoScale | None = None
     cluster_name: str
     spark_version: str
-    spark_conf: Dict[str, str] = {}
+    spark_conf: dict[str, str] = {}
     aws_attributes: AwsAttributes
-    node_type_id: Optional[str] = None
-    driver_node_type_id: Optional[str] = None
-    ssh_public_keys: List[str] = []
-    custom_tags: Optional[dict] = None
-    cluster_log_conf: Optional[dict] = None
-    init_scripts: List[dict] = []
-    docker_image: Optional[DockerImage] = None
-    spark_env_vars: Dict[str, str] = {}
-    autotermination_minutes: Optional[int] = None
-    enable_elastic_disk: Optional[bool] = None
-    driver_instance_pool_id: Optional[str] = None
-    instance_pool_id: Optional[str] = None
-    idempotency_token: Optional[str] = None
-    apply_policy_default_values: Optional[bool] = None
-    enable_local_disk_encryption: Optional[bool] = None
-    data_security_mode: Optional[str] = None
-    runtime_engine: Optional[str] = None
+    node_type_id: str | None = None
+    driver_node_type_id: str | None = None
+    ssh_public_keys: list[str] = []
+    custom_tags: dict | None = None
+    cluster_log_conf: dict | None = None
+    init_scripts: list[dict] = []
+    docker_image: DockerImage | None = None
+    spark_env_vars: dict[str, str] = {}
+    autotermination_minutes: int | None = None
+    enable_elastic_disk: bool | None = None
+    driver_instance_pool_id: str | None = None
+    instance_pool_id: str | None = None
+    idempotency_token: str | None = None
+    apply_policy_default_values: bool | None = None
+    enable_local_disk_encryption: bool | None = None
+    data_security_mode: str | None = None
+    runtime_engine: str | None = None
 
 
 class ClusterProperties(BaseModel):
@@ -83,7 +82,7 @@ def get_cluster_by_name(cluster_name: str, workspace_url: str):
     return None
 
 
-def get_cluster_by_id(cluster_id: str, workspace_url: str) -> Optional[dict]:
+def get_cluster_by_id(cluster_id: str, workspace_url: str) -> dict | None:
     """Getting cluster based on name"""
     body = {"cluster_id": cluster_id}
     resp = requests.get(
@@ -97,7 +96,7 @@ def get_cluster_by_id(cluster_id: str, workspace_url: str) -> Optional[dict]:
     return resp.json()
 
 
-def create_or_update_cluster(properties: ClusterProperties, physical_resource_id: Optional[str]) -> CnfResponse:
+def create_or_update_cluster(properties: ClusterProperties, physical_resource_id: str | None) -> CnfResponse:
     """Create cluster at databricks"""
     current = None
     if physical_resource_id is not None:

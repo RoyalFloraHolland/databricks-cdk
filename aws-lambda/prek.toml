@@ -1,0 +1,40 @@
+# $schema: https://www.schemastore.org/prek.json
+[[repos]]
+repo = "local"
+hooks = [
+    {
+        id = "uv-lock",
+        name = "uv lock",
+        language = "system",
+        entry = "uv lock --check",
+        files = { glob = [
+            "pyproject.toml",
+            "uv.lock"
+        ]},
+        pass_filenames = false,
+    },
+    {
+        id = "ruff-check",
+        name = "ruff check lint",
+        language = "system",
+        entry = "uv run ruff check",
+        types = ["python"],
+        pass_filenames = false,
+    },
+    {
+        id = "ruff-check-format",
+        name = "ruff check format",
+        language = "system",
+        entry = "uv run ruff format --check",
+        types = ["python"],
+        pass_filenames = false,
+    },
+    {
+        id = "ty check",
+        name = "ty check",
+        language = "system",
+        entry = "uv run ty check",
+        types = ["python"],
+        pass_filenames = false,
+    },
+]

@@ -1,7 +1,7 @@
 import logging
 import os
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Any
 
 import boto3
 from databricks.sdk import AccountClient, WorkspaceClient
@@ -61,7 +61,7 @@ def get_authentication_config() -> Config:
     )
 
 
-def get_authorization_headers() -> Dict[str, str]:
+def get_authorization_headers() -> dict[str, str]:
     """Get authorization headers"""
     return get_authentication_config().authenticate()
 
@@ -92,9 +92,9 @@ def get_client_id() -> str:
 def _do_request(
     method: str,
     url: str,
-    body: Optional[Dict[str, Any]] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    body: dict[str, Any] | None = None,
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Generic method to do any type of request
 
@@ -124,23 +124,23 @@ def _do_request(
 
 def post_request(
     url: str,
-    body: Dict[str, Any],
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    body: dict[str, Any],
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Generic method to do post requests"""
     return _do_request(method="POST", url=url, body=body, params=params)
 
 
 def put_request(
     url: str,
-    body: Dict[str, Any],
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    body: dict[str, Any],
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Generic method to do put requests"""
     return _do_request(method="PUT", url=url, body=body, params=params)
 
 
-def patch_request(url: str, body: dict, params: dict = None) -> dict:
+def patch_request(url: str, body: dict, params: dict | None = None) -> dict:
     """Generic method to do patch requests"""
 
     return _do_request(method="PATCH", url=url, body=body, params=params)
@@ -148,23 +148,23 @@ def patch_request(url: str, body: dict, params: dict = None) -> dict:
 
 def get_request(
     url: str,
-    body: Optional[Dict[str, Any]] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    body: dict[str, Any] | None = None,
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Generic method to do get requests"""
     return _do_request(method="GET", url=url, body=body, params=params)
 
 
 def delete_request(
     url: str,
-    body: Optional[Dict[str, Any]] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    body: dict[str, Any] | None = None,
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Generic method to do delete requests"""
     return _do_request(method="DELETE", url=url, body=body, params=params)
 
 
-def get_workspace_client(workspace_url: str, config: Optional[Config] = None) -> WorkspaceClient:
+def get_workspace_client(workspace_url: str, config: Config | None = None) -> WorkspaceClient:
     """Get Databricks WorkspaceClient instance, either from config or from username/password
     :param workspace_url: Workspace url to connect to
     :param config: Optional config to use, when provided overwrites workspace_url provided,
@@ -177,7 +177,7 @@ def get_workspace_client(workspace_url: str, config: Optional[Config] = None) ->
 
 
 def get_account_client(
-    config: Optional[Config] = None, host: str = "https://accounts.cloud.databricks.com"
+    config: Config | None = None, host: str = "https://accounts.cloud.databricks.com"
 ) -> AccountClient:
     """Get Databricks AccountClient instance, either from config defaulting to ssm params
     :param host: Url to account url to, defaults to 'https://accounts.cloud.databricks.com'

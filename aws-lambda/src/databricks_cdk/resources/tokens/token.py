@@ -1,7 +1,7 @@
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import boto3
 from pydantic import BaseModel
@@ -19,15 +19,15 @@ class TokenInfo(BaseModel):
 
 
 class TokenList(BaseModel):
-    token_infos: List[TokenInfo]
+    token_infos: list[TokenInfo]
 
 
 class TokenProperties(BaseModel):
     action: str = "token"
     token_name: str
     workspace_url: str
-    lifetime_seconds: Optional[int]
-    comment: Optional[str]
+    lifetime_seconds: int | None
+    comment: str | None
 
 
 class TokenCreateReponse(CnfResponse):
@@ -37,7 +37,7 @@ class TokenCreateReponse(CnfResponse):
     comment: str
 
 
-def get_existing_tokens(token_url: str) -> List[TokenInfo]:
+def get_existing_tokens(token_url: str) -> list[TokenInfo]:
     """Get a list of existing tokens"""
     response = get_request(f"{token_url}/list")
 
@@ -56,7 +56,7 @@ def _delete_token(token_url: str, token_id: str):
     post_request(url=f"{token_url}/delete", body={"token_id": token_id})
 
 
-def _create_token(token_url: str, comment: Optional[str], lifetime_seconds: Optional[int]) -> Dict[str, Any]:
+def _create_token(token_url: str, comment: str | None, lifetime_seconds: int | None) -> dict[str, Any]:
     return post_request(f"{token_url}/create", body={"comment": comment, "lifetime_seconds": lifetime_seconds})
 
 
@@ -90,7 +90,7 @@ def update_token_in_secrets_manager(token_name: str, token_id: str, token_value:
     return client.update_secret(SecretId=secret_name, SecretString=json.dumps(secret_string))["ARN"]
 
 
-def create_or_update_token(properties: TokenProperties, physical_resource_id: Optional[str] = None) -> CnfResponse:
+def create_or_update_token(properties: TokenProperties, physical_resource_id: str | None = None) -> CnfResponse:
     """
     Creates or updates a new token.
 

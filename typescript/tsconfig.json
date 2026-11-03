@@ -1,18 +1,18 @@
 {
-  "compilerOptions": {
-    "target": "ES2018",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "lib": [
-      "es2016",
-      "es2017.object",
-      "es2017.string"
-    ],
-    "declaration": true,
-    "strict": true,
-    "outDir": "./dist"
-  },
-  "include": [
-    "src/**/*"
-  ]
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "lib": [
+            "es2016",
+            "es2017.object",
+            "es2017.string"
+        ],
+        "declaration": true,
+        "strict": true,
+        "outDir": "./dist"
+    },
+    "include": [
+        "src/**/*"
+    ]
 }

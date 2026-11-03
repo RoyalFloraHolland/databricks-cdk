@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict, Optional
 
 from pydantic import BaseModel
 
@@ -11,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 class Catalog(BaseModel):
     name: str
-    comment: Optional[str]
-    properties: Dict[str, str] = {}
-    owner: Optional[str]
+    comment: str | None
+    properties: dict[str, str] = {}
+    owner: str | None
 
 
 class CatalogProperties(BaseModel):
@@ -30,13 +29,13 @@ def get_catalog_url(workspace_url: str):
     return f"{workspace_url}/api/2.1/unity-catalog/catalogs"
 
 
-def get_catalog_by_name(catalog_name: str, base_url: str) -> Optional[dict]:
+def get_catalog_by_name(catalog_name: str, base_url: str) -> dict | None:
     return get_request(f"{base_url}/{catalog_name}")
 
 
 def create_or_update_catalog(properties: CatalogProperties) -> CatalogResponse:
     """Create catalog at databricks"""
-    current: Optional[dict] = None
+    current: dict | None = None
     base_url = get_catalog_url(properties.workspace_url)
     if current is None:
         current = get_catalog_by_name(properties.catalog.name, base_url=base_url)

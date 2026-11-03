@@ -1,9 +1,7 @@
-from typing import Dict, List
-
 from databricks.sdk.service.catalog import PermissionsChange, PermissionsList, Privilege, PrivilegeAssignment
 
 
-def get_assignment_dict_from_permissions_list(permissions_list: PermissionsList) -> Dict[str, List[Privilege]]:
+def get_assignment_dict_from_permissions_list(permissions_list: PermissionsList) -> dict[str, list[Privilege]]:
     """Converts PermissionsList to dict with key of principal and list of associated privileges as value"""
     privilige_assignments = permissions_list.privilege_assignments
 
@@ -18,8 +16,8 @@ def get_assignment_dict_from_permissions_list(permissions_list: PermissionsList)
 
 
 def get_assignment_dict_from_privilege_assignments(
-    privilege_assignments: List[PrivilegeAssignment],
-) -> Dict[str, List[Privilege]]:
+    privilege_assignments: list[PrivilegeAssignment],
+) -> dict[str, list[Privilege]]:
     """Converts list of PrivilegeAssignment to dict with key of principal and list of associated privileges as value"""
     return {
         x.principal: x.privileges for x in privilege_assignments if x.principal is not None and x.privileges is not None
@@ -27,9 +25,9 @@ def get_assignment_dict_from_privilege_assignments(
 
 
 def get_permission_changes_principals(
-    assignments_on_databricks_dict: Dict[str, List[Privilege]],
-    assignments_from_properties_dict: Dict[str, List[Privilege]],
-) -> List[PermissionsChange]:
+    assignments_on_databricks_dict: dict[str, list[Privilege]],
+    assignments_from_properties_dict: dict[str, list[Privilege]],
+) -> list[PermissionsChange]:
     """See if there are new principals that need to be added"""
     permission_changes = []
 
@@ -53,9 +51,9 @@ def get_permission_changes_principals(
 
 
 def get_permission_changes_assignments_changed(
-    assignments_on_databricks_dict: Dict[str, List[Privilege]],
-    assignments_from_properties_dict: Dict[str, List[Privilege]],
-) -> List[PermissionsChange]:
+    assignments_on_databricks_dict: dict[str, list[Privilege]],
+    assignments_from_properties_dict: dict[str, list[Privilege]],
+) -> list[PermissionsChange]:
     """See if there are principal assignemnts that need to be updated"""
     permission_changes = []
     for principal, privileges in assignments_from_properties_dict.items():
@@ -71,14 +69,14 @@ def get_permission_changes_assignments_changed(
 
 
 def get_permission_changes(
-    assignments_on_databricks: PermissionsList, assignments_from_properties: List[PrivilegeAssignment]
-) -> List[PermissionsChange]:
+    assignments_on_databricks: PermissionsList, assignments_from_properties: list[PrivilegeAssignment]
+) -> list[PermissionsChange]:
     """Get the changes between the existing grants and the new grants and create PermissionsChange object"""
     # Convert to dict for easier lookup
     assignments_on_databricks_dict = get_assignment_dict_from_permissions_list(assignments_on_databricks)
     assignments_from_properties_dict = get_assignment_dict_from_privilege_assignments(assignments_from_properties)
 
-    permission_changes: List[PermissionsChange] = []
+    permission_changes: list[PermissionsChange] = []
     permission_changes += get_permission_changes_principals(
         assignments_on_databricks_dict, assignments_from_properties_dict
     )

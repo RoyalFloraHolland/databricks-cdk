@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.ml import ModelTag
 from pydantic import BaseModel
@@ -9,8 +7,8 @@ from databricks_cdk.utils import CnfResponse, get_workspace_client
 
 class RegisteredModelProperties(BaseModel):
     name: str
-    tags: Optional[List[ModelTag]] = []
-    description: Optional[str]
+    tags: list[ModelTag] | None = []
+    description: str | None
     workspace_url: str
 
 
@@ -21,7 +19,7 @@ class RegisteredModelCreateResponse(CnfResponse):
 def _update_registered_model_tags(
     workspace_client: WorkspaceClient,
     properties: RegisteredModelProperties,
-    current_tags: List[ModelTag],
+    current_tags: list[ModelTag],
 ):
     """Updates the registered model tags"""
     tags_to_delete = []
@@ -45,9 +43,7 @@ def _update_registered_model_tags(
         ]
 
 
-def create_or_update_registered_model(
-    properties: RegisteredModelProperties, physical_resource_id: Optional[str] = None
-):
+def create_or_update_registered_model(properties: RegisteredModelProperties, physical_resource_id: str | None = None):
     """
     Creates a new registered model if no physical_resource_id is provided. Otherwise, this function checks whether the
     registered model needs to be updated based on the provided properties.

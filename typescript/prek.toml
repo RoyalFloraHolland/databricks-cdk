@@ -1,0 +1,14 @@
+# $schema: https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "local"
+hooks = [
+    {
+        id = "run-lint",
+        name = "run linter",
+        language = "system",
+        entry = "npm run lint",
+        types = ["ts"],
+        pass_filenames = false,
+    },
+]

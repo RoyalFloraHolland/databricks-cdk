@@ -4,7 +4,7 @@
 
 ## Overview
 
-databricks-cdk is an open source library that allows you to deploy Databricks workspace and resources on AWS using the AWS Cloud Development Kit (CDK) version 2 and TypeScript. 
+databricks-cdk is an open source library that allows you to deploy Databricks workspace and resources on AWS using the AWS Cloud Development Kit (CDK) version 2 and TypeScript.
 
 ## Prerequisites
 
@@ -100,6 +100,7 @@ See also the simple-workspace and multi-stack examples in [examples](examples)
 We welcome contributions to databricks-cdk! If you'd like to contribute, please follow these steps:
 
 1. Fork the repository.
+2. Install [prek](https://prek.j178.dev/) hooks
 2. Create a branch for your feature or bug fix.
 3. Make your changes.
 4. Test your changes thoroughly.

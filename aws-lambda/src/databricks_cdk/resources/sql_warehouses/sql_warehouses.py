@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -14,7 +13,7 @@ class WarehouseTagPairs(BaseModel):
 
 
 class WarehouseTags(BaseModel):
-    custom_tags: List[WarehouseTagPairs]
+    custom_tags: list[WarehouseTagPairs]
 
 
 class Channel(BaseModel):
@@ -24,28 +23,28 @@ class Channel(BaseModel):
 class SQLWarehouse(BaseModel):
     name: str
     cluster_size: str
-    min_num_clusters: Optional[int] = None
+    min_num_clusters: int | None = None
     max_num_clusters: int
-    auto_stop_mins: Optional[int] = None
-    tags: Optional[WarehouseTags] = None
-    spot_instance_policy: Optional[str] = None
-    enable_photon: Optional[bool] = None
-    enable_serverless_compute: Optional[bool] = None
-    channel: Optional[Channel] = None
+    auto_stop_mins: int | None = None
+    tags: WarehouseTags | None = None
+    spot_instance_policy: str | None = None
+    enable_photon: bool | None = None
+    enable_serverless_compute: bool | None = None
+    channel: Channel | None = None
 
 
 class SQLWarehouseEdit(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
-    cluster_size: Optional[str] = None
-    min_num_clusters: Optional[int] = None
-    max_num_clusters: Optional[int] = None
-    auto_stop_mins: Optional[int] = None
-    tags: Optional[WarehouseTags] = None
-    spot_instance_policy: Optional[str] = None
-    enable_photon: Optional[bool] = None
-    enable_serverless_compute: Optional[bool] = None
-    channel: Optional[Channel] = None
+    id: str | None = None
+    name: str | None = None
+    cluster_size: str | None = None
+    min_num_clusters: int | None = None
+    max_num_clusters: int | None = None
+    auto_stop_mins: int | None = None
+    tags: WarehouseTags | None = None
+    spot_instance_policy: str | None = None
+    enable_photon: bool | None = None
+    enable_serverless_compute: bool | None = None
+    channel: Channel | None = None
 
 
 class SQLWarehouseProperties(BaseModel):
@@ -63,7 +62,7 @@ def get_warehouse_url(workspace_url: str):
     return f"{workspace_url}/api/2.0/sql/warehouses/"
 
 
-def get_warehouse_by_name(warehouse_name: str, workspace_url: str) -> Optional[dict]:
+def get_warehouse_by_name(warehouse_name: str, workspace_url: str) -> dict | None:
     """Getting warehouse by name"""
     all_warehouses = get_request(f"{workspace_url}/api/2.0/sql/warehouses/").get("warehouses")
     if all_warehouses is None:
@@ -76,7 +75,7 @@ def get_warehouse_by_name(warehouse_name: str, workspace_url: str) -> Optional[d
     return None
 
 
-def create_or_update_warehouse(properties: SQLWarehouseProperties, physical_resource_id: Optional[str]):
+def create_or_update_warehouse(properties: SQLWarehouseProperties, physical_resource_id: str | None):
     """Create or update warehouse at Databricks"""
     url = get_warehouse_url(properties.workspace_url)
     warehouse_properties = properties.warehouse

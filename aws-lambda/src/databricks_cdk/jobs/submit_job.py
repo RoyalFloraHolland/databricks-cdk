@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from pydantic import BaseModel
 
 from databricks_cdk.utils import post_request
@@ -7,12 +5,12 @@ from databricks_cdk.utils import post_request
 
 class JobArgs(BaseModel):
     job_id: int
-    idempotency_token: Optional[str]
-    jar_params: Optional[List[str]]
-    notebook_params: Optional[dict]
-    python_params: Optional[List[str]]
-    spark_submit_params: Optional[List[str]]
-    python_named_params: Optional[dict]
+    idempotency_token: str | None
+    jar_params: list[str] | None
+    notebook_params: dict | None
+    python_params: list[str] | None
+    spark_submit_params: list[str] | None
+    python_named_params: dict | None
 
 
 class SubmitJobEvent(BaseModel):

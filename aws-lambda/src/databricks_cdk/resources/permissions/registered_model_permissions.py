@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -30,7 +29,7 @@ class ServicePrincipalPermission(ServicePrincipal):
 class RegisteredModelPermissionPermissionProperties(BaseModel):
     action: str = "registered-model-permission"
     registered_model_id: str
-    access_control_list: List[Union[UserPermission, GroupPermission, ServicePrincipalPermission]]
+    access_control_list: list[UserPermission | GroupPermission | ServicePrincipalPermission]
     workspace_url: str
 
 

@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class StorageCredential(BaseModel):
     name: str
-    comment: Optional[str]
+    comment: str | None
 
 
 class AwsIamRole(BaseModel):
@@ -44,7 +43,7 @@ class StorageCredentialGcp(StorageCredential):
 
 class StorageCredentialsProperties(BaseModel):
     workspace_url: str
-    storage_credential: Union[StorageCredentialAws, StorageCredentialAzure, StorageCredentialGcp]
+    storage_credential: StorageCredentialAws | StorageCredentialAzure | StorageCredentialGcp
 
 
 class StorageCredentialsResponse(CnfResponse):
@@ -57,7 +56,7 @@ def get_storage_credential_url(workspace_url: str) -> str:
     return f"{workspace_url}/api/2.1/unity-catalog/storage-credentials"
 
 
-def get_storage_credential_by_name(name: str, base_url: str) -> Optional[dict]:
+def get_storage_credential_by_name(name: str, base_url: str) -> dict | None:
     try:
         return get_request(f"{base_url}/{name}")
     except Exception as e:

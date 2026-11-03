@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -9,25 +8,25 @@ from databricks_cdk.utils import CnfResponse, get_request, post_request
 logger = logging.getLogger(__name__)
 
 
-Value = Union[int, bool, str]
+Value = int | bool | str
 
 
 class PolicyElement(BaseModel):
     type: str
-    value: Optional[Value]
-    hidden: Optional[bool]
-    defaultValue: Optional[Value]
-    isOptional: Optional[bool]
-    minValue: Optional[int]
-    maxValue: Optional[int]
-    values: Optional[List[Value]]
-    pattern: Optional[str]
+    value: Value | None
+    hidden: bool | None
+    defaultValue: Value | None
+    isOptional: bool | None
+    minValue: int | None
+    maxValue: int | None
+    values: list[Value] | None
+    pattern: str | None
 
 
 class ClusterPolicy(BaseModel):
     name: str
-    description: Optional[str]
-    definition: Dict[str, PolicyElement]
+    description: str | None
+    definition: dict[str, PolicyElement]
 
 
 class ClusterPolicyProperties(BaseModel):
@@ -40,7 +39,7 @@ def get_cluster_policy_url(workspace_url: str) -> str:
     return f"{workspace_url}/api/2.0/policies/clusters"
 
 
-def get_cluster_policy_by_id(cluster_policy_id: str, workspace_url: str) -> Optional[dict]:
+def get_cluster_policy_by_id(cluster_policy_id: str, workspace_url: str) -> dict | None:
     """Getting cluster policy by id"""
     body = {"policy_id": cluster_policy_id}
     resp = get_request(url=f"{get_cluster_policy_url(workspace_url)}/get", body=body)
@@ -48,7 +47,7 @@ def get_cluster_policy_by_id(cluster_policy_id: str, workspace_url: str) -> Opti
 
 
 def create_or_update_cluster_policy(
-    properties: ClusterPolicyProperties, physical_resource_id: Optional[str]
+    properties: ClusterPolicyProperties, physical_resource_id: str | None
 ) -> CnfResponse:
     """Create cluster policy at databricks"""
     current = None

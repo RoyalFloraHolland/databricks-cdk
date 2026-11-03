@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound
@@ -20,8 +19,8 @@ class Volume(BaseModel):
     catalog_name: str
     schema_name: str
     volume_type: VolumeType = VolumeType.MANAGED
-    comment: Optional[str] = None
-    storage_location: Optional[str] = None
+    comment: str | None = None
+    storage_location: str | None = None
 
     @property
     def full_name(self) -> str:
@@ -38,7 +37,7 @@ class VolumeResponse(CnfResponse):
     name: str
 
 
-def create_or_update_volume(properties: VolumeProperties, physical_resource_id: Optional[str] = None) -> VolumeResponse:
+def create_or_update_volume(properties: VolumeProperties, physical_resource_id: str | None = None) -> VolumeResponse:
     """
     Create or update volume on databricks. If physical_resource_id is provided, it will update the existing volume
     else it will create a new one.

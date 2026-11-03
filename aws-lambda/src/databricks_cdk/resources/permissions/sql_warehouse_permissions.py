@@ -1,5 +1,4 @@
 import logging
-from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -17,7 +16,7 @@ class SQLWarehousePermissionsProperties(BaseModel):
     action: str = "warehouse-permissions"
     workspace_url: str
     endpoint_id: str
-    access_control_list: List[Union[UserPermission, GroupPermission, ServicePrincipalPermission]]
+    access_control_list: list[UserPermission | GroupPermission | ServicePrincipalPermission]
 
 
 def get_warehouse_permissions_url(workspace_url: str, endpoint_id: str):

@@ -85,7 +85,7 @@ def test_delete_experiment_permissions(patched_put_request):
 
     assert isinstance(response, CnfResponse)
     assert response.physical_resource_id == "1234/permissions"
-    patched_put_request.call_args.args == (
+    assert patched_put_request.call_args.args == (
         "https://test.cloud.databricks.com/api/2.0/permissions/registered-models/1234",
         {"access_control_list": []},
     )
