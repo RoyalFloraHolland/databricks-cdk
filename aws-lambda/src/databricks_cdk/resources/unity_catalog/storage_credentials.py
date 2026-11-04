@@ -3,7 +3,7 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request
+from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +73,10 @@ def create_or_update_storage_credential(
     body = json.loads(properties.storage_credential.json())
     if current is None:
         response = post_request(base_url, body=body)
+        wait_until_found(
+            lambda: get_storage_credential_by_name(properties.storage_credential.name, base_url=base_url),
+            f"Storage credential {properties.storage_credential.name}",
+        )
     else:
         response = patch_request(f"{base_url}/{properties.storage_credential.name}", body=body)
     return StorageCredentialsResponse(
