@@ -1,5 +1,5 @@
 import os
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from databricks.sdk import AccountClient, CredentialsAPI, ExperimentsAPI, ModelRegistryAPI, VolumesAPI, WorkspaceClient
@@ -16,6 +16,21 @@ def aws_credentials():
     os.environ["AWS_SECURITY_TOKEN"] = "testing"
     os.environ["AWS_SESSION_TOKEN"] = "testing"
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-1"
+
+
+@pytest.fixture(scope="function", autouse=True)
+def patched_sleep():
+    """Make readiness waits instant, sleeping advances a fake clock instead of real time"""
+    clock = {"now": 0.0}
+
+    def fake_sleep(seconds: float):
+        clock["now"] += seconds
+
+    with (
+        patch("databricks_cdk.utils.monotonic", side_effect=lambda: clock["now"]),
+        patch("databricks_cdk.utils.sleep", side_effect=fake_sleep) as patched,
+    ):
+        yield patched
 
 
 @pytest.fixture(scope="function")

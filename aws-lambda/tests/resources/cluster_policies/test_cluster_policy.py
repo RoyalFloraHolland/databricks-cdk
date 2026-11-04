@@ -12,8 +12,9 @@ WORKSPACE_URL = "https://dbc-test.cloud.databricks.com"
 CLUSTER_POLICY_URL = f"{WORKSPACE_URL}/api/2.0/policies/clusters"
 
 
+@patch("databricks_cdk.resources.cluster_policies.cluster_policy.get_request")
 @patch("databricks_cdk.resources.cluster_policies.cluster_policy.post_request")
-def test_create_cluster_policy(mock_request: MagicMock):
+def test_create_cluster_policy(mock_request: MagicMock, mock_get_request: MagicMock):
     definition = {
         "test": {
             "type": "regex",

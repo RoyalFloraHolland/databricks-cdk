@@ -9,7 +9,7 @@ from databricks_cdk.resources.unity_catalog.storage_credentials import (
     StorageCredentialsProperties,
     create_or_update_storage_credential,
 )
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request
+from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +65,10 @@ def create_or_update_metastore(properties: MetastoreProperties, physical_resourc
     if current is None:
         # create metastore
         current = post_request(base_url, body=json.loads(properties.metastore.json()))
+        wait_until_found(
+            lambda: get_metastore_by_id(current["metastore_id"], base_url=base_url),
+            f"Metastore {properties.metastore.name}",
+        )
     metastore_id = current.get("metastore_id")
     body = json.loads(properties.metastore.json())
     body["storage_root_credential_id"] = credential_result.storage_credential_id

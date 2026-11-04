@@ -5,7 +5,7 @@ from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import VolumeInfo, VolumeType
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, get_workspace_client
+from databricks_cdk.utils import CnfResponse, get_workspace_client, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,11 @@ def create_volume(properties: VolumeProperties, workspace_client: WorkspaceClien
 
     if created_volume.volume_id is None:
         raise VolumeCreationError("Volume creation failed, there was no id found")
+
+    wait_until_found(
+        lambda: workspace_client.volumes.read(full_name_arg=properties.volume.full_name),
+        f"Volume {properties.volume.full_name}",
+    )
 
     return VolumeResponse(name=properties.volume.name, physical_resource_id=created_volume.volume_id)
 

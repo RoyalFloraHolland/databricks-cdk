@@ -9,6 +9,7 @@ from databricks_cdk.utils import (
     get_account_id,
     get_request,
     post_request,
+    wait_until_found,
 )
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,10 @@ def create_or_update_storage_configuration(
             "root_bucket_info": {"bucket_name": properties.bucket_name},
         }
         response = post_request(url, body=body)
+        wait_until_found(
+            lambda: get_storage_by_id(response["storage_configuration_id"]),
+            f"Storage configuration {properties.storage_configuration_name}",
+        )
         return StorageConfigResponse(
             physical_resource_id=properties.storage_configuration_name,
             storage_configuration_name=properties.storage_configuration_name,

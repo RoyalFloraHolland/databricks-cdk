@@ -5,7 +5,7 @@ from databricks.sdk.errors import NotFound
 from databricks.sdk.service.iam import ServicePrincipal
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, get_account_client, get_workspace_client
+from databricks_cdk.utils import CnfResponse, get_account_client, get_workspace_client, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +76,11 @@ def create_service_principal(
 
     if created_service_principal.id is None:
         raise ServicePrincipalCreationError("Service principal creation failed, there was no id found")
+
+    wait_until_found(
+        lambda: workspace_client.service_principals.get(id=created_service_principal.id),
+        f"Service principal {created_service_principal.display_name}",
+    )
 
     return ServicePrincipalResponse(
         name=created_service_principal.display_name,

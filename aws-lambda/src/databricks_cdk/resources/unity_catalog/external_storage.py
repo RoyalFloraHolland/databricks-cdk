@@ -3,7 +3,7 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request
+from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,10 @@ def create_or_update_external_location(
     body = json.loads(properties.external_location.json())
     if current is None:
         post_request(base_url, body=body)
+        wait_until_found(
+            lambda: get_external_location_by_name(properties.external_location.name, base_url=base_url),
+            f"External location {properties.external_location.name}",
+        )
     else:
         patch_request(f"{base_url}/{properties.external_location.name}", body=body)
     return ExternalLocationResponse(

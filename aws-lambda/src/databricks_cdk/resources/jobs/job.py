@@ -4,7 +4,7 @@ import logging
 from pydantic import BaseModel, root_validator, validator
 from requests.exceptions import HTTPError
 
-from databricks_cdk.utils import CnfResponse, get_request, post_request
+from databricks_cdk.utils import CnfResponse, get_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -317,6 +317,9 @@ def create_or_update_job(properties: JobProperties, physical_resource_id: str | 
     if current is None:
         create_response = post_request(f"{url}/create", body=job_settings_body(properties.job))
         job_id = create_response.get("job_id")
+        wait_until_found(
+            lambda: get_job_by_id(create_response["job_id"], properties.workspace_url), f"Job {properties.job.name}"
+        )
         return JobResponse(job_id=job_id, physical_resource_id=job_id)
     else:
         job_id = current.get("job_id")

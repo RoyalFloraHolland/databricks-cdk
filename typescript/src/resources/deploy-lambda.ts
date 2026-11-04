@@ -346,7 +346,7 @@ export class DatabricksDeployLambda extends IDatabricksDeployLambda {
         this.lambda = new aws_lambda.DockerImageFunction(this, lambdaId, {
             functionName: this.props.lambdaName,
             code: dockerImageCode,
-            timeout: Duration.seconds(300),
+            timeout: Duration.minutes(15), // max timeout for lambda, waiting until resources are ready can take a while
             role: this.lambdaRole,
             memorySize: 512,
             environment: {
