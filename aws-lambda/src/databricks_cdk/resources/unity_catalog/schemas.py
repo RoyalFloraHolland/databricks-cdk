@@ -3,7 +3,7 @@ import logging
 
 from pydantic import BaseModel, Field
 
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request
+from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,12 @@ def create_or_update_schema(properties: SchemaProperties) -> SchemaResponse:
             base_url,
             params={"catalog_name": properties.schema_object.catalog_name},
             body=body,
+        )
+        wait_until_found(
+            lambda: get_schema_by_name(
+                properties.schema_object.catalog_name, properties.schema_object.name, base_url=base_url
+            ),
+            f"Schema {properties.schema_object.catalog_name}.{properties.schema_object.name}",
         )
     else:
         patch_request(
