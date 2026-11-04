@@ -1,16 +1,20 @@
 import logging
-import time
 
 from pydantic import BaseModel
+from requests.exceptions import HTTPError
 
 from databricks_cdk.utils import (
     ACCOUNTS_BASE_URL,
+    WORKSPACE_WAIT_TIMEOUT_SECONDS,
     CnfResponse,
+    ResourceNotReadyError,
     delete_request,
     get_account_id,
     get_request,
+    is_not_found_error,
     patch_request,
     post_request,
+    wait_until_ready,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,9 +49,14 @@ def get_workspaces_url():
 
 
 def get_workspace_by_id(workspace_id: str) -> dict | None:
-    """Getting workspace by name"""
+    """Getting workspace by id, returns None if it does not exist"""
     url = get_workspaces_url()
-    return get_request(url=f"{url}/{workspace_id}")
+    try:
+        return get_request(url=f"{url}/{workspace_id}")
+    except HTTPError as e:
+        if is_not_found_error(e):
+            return None
+        raise
 
 
 def get_workspace_by_name(workspace_name: str) -> dict | None:
@@ -73,7 +82,7 @@ def create_or_update_workspaces(properties: WorkspaceProperties) -> WorkspaceRes
         del body["action"]
         response = post_request(url, body=body)
         workspace_id = response["workspace_id"]
-        wait_on_provioning(workspace_id)
+        wait_on_provisioning(workspace_id)
         deployment_name = response["deployment_name"]
         return WorkspaceResponse(
             physical_resource_id=workspace_id,
@@ -104,7 +113,7 @@ def create_or_update_workspaces(properties: WorkspaceProperties) -> WorkspaceRes
             patch_body = {
                 "aws_region": properties.aws_region,
                 "credentials_id": properties.credentials_id,
-                "storage_configuration_id": properties.credentials_id,
+                "storage_configuration_id": properties.storage_configuration_id,
                 "network_id": properties.network_id,
                 "managed_services_customer_managed_key_id": properties.managed_services_customer_managed_key_id,
                 "storage_customer_managed_key_id": properties.storage_customer_managed_key_id,
@@ -112,7 +121,7 @@ def create_or_update_workspaces(properties: WorkspaceProperties) -> WorkspaceRes
             patch_request(patch_url, patch_body)
         else:
             logger.info("Workspace already found and no changes detected")
-        wait_on_provioning(workspace_id)
+        wait_on_provisioning(workspace_id)
         deployment_name = current["deployment_name"]
         return WorkspaceResponse(
             physical_resource_id=workspace_id,
@@ -123,20 +132,27 @@ def create_or_update_workspaces(properties: WorkspaceProperties) -> WorkspaceRes
         )
 
 
-def wait_on_provioning(workspace_id: str):
+def get_running_workspace(workspace_id: str) -> dict:
+    """Get workspace, raises ResourceNotReadyError while it is still being provisioned"""
+    response = get_workspace_by_id(workspace_id)
+    if response is None:
+        raise ResourceNotReadyError("not found")
+    status = response["workspace_status"]
+    if status in ("NOT_PROVISIONED", "PROVISIONING"):
+        raise ResourceNotReadyError(f"status is {status}")
+    if status != "RUNNING":
+        raise RuntimeError(f"Status of workspace is {status} with message: {response.get('workspace_status_message')}")
+    return response
+
+
+def wait_on_provisioning(workspace_id: str):
     """Wait until provisioning is done"""
-    logger.info("Get status of workspace")
-    url = f"{get_workspaces_url()}/{workspace_id}"
-    response = get_request(url)
-    while response["workspace_status"] == "PROVISIONING":
-        logger.info("Status of workspace is still PROVISIONING")
-        time.sleep(10)
-        response = get_request(url)
-    logger.info(f"Status of workspace is {response['workspace_status']}")
-    if response["workspace_status"] != "RUNNING":
-        raise RuntimeError(
-            f"Status of workspace is {response['workspace_status']} with message: {response['workspace_status_message']}"
-        )
+    wait_until_ready(
+        lambda: get_running_workspace(workspace_id),
+        f"Workspace {workspace_id}",
+        timeout_seconds=WORKSPACE_WAIT_TIMEOUT_SECONDS,
+    )
+    logger.info(f"Workspace {workspace_id} is RUNNING")
 
 
 def delete_workspaces(properties: WorkspaceProperties, physical_resource_id: str) -> CnfResponse:
