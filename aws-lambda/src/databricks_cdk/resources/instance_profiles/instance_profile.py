@@ -2,7 +2,7 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, get_request, post_request
+from databricks_cdk.utils import CnfResponse, get_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,10 @@ def create_or_update_instance_profile(
             "skip_validation": properties.skip_validation,
         }
         post_request(f"{get_instance_profile_url(properties.workspace_url)}/add", body=body)
+        wait_until_found(
+            lambda: get_instance_profile_by_arn(properties.instance_profile_arn, properties.workspace_url),
+            f"Instance profile {properties.instance_profile_arn}",
+        )
         return CnfResponse(
             physical_resource_id=properties.instance_profile_arn,
         )
