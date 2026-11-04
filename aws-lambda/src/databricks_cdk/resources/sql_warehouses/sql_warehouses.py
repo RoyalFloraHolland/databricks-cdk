@@ -2,7 +2,7 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, post_request
+from databricks_cdk.utils import CnfResponse, delete_request, get_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +85,7 @@ def create_or_update_warehouse(properties: SQLWarehouseProperties, physical_reso
     if current is None:
         create_response = post_request(url=url, body=warehouse_properties.dict())
         warehouse_id = create_response.get("id")
+        wait_until_found(lambda: get_request(f"{url}{warehouse_id}"), f"Warehouse {warehouse_properties.name}")
         return SQLWarehouseResponse(id=warehouse_id, physical_resource_id=warehouse_id)
     else:
         warehouse_id = current.get("id")
