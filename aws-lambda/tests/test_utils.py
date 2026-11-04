@@ -222,7 +222,6 @@ def test_get_account_client(
     )
 
 
-
 def test_wait_until_ready_returns_when_ready(patched_sleep):
     check_fn = MagicMock(side_effect=[ResourceNotReadyError("pending"), ResourceNotReadyError("pending"), "ready"])
 
