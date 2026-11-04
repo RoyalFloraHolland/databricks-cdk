@@ -3,7 +3,7 @@ import logging
 from databricks.sdk.service.provisioning import CreateCredentialAwsCredentials, CreateCredentialStsRole
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, get_account_client
+from databricks_cdk.utils import CnfResponse, get_account_client, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,10 @@ def create_or_update_credentials(
         credential = account_client.credentials.create(
             credentials_name=properties.credentials_name,
             aws_credentials=CreateCredentialAwsCredentials(CreateCredentialStsRole(properties.role_arn)),
+        )
+        wait_until_found(
+            lambda: account_client.credentials.get(credentials_id=credential.credentials_id),
+            f"Credentials {properties.credentials_name}",
         )
         return CredentialsResponse(
             physical_resource_id=credential.credentials_id,
