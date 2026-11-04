@@ -81,7 +81,7 @@ def create_volume(properties: VolumeProperties, workspace_client: WorkspaceClien
         raise VolumeCreationError("Volume creation failed, there was no id found")
 
     wait_until_found(
-        lambda: workspace_client.volumes.read(full_name_arg=properties.volume.full_name),
+        lambda: workspace_client.volumes.read(name=properties.volume.full_name),
         f"Volume {properties.volume.full_name}",
     )
 
@@ -96,8 +96,8 @@ def update_volume(
 ) -> VolumeResponse:
     """Update volume on databricks based on physical_resource_id"""
     workspace_client.volumes.update(
-        full_name_arg=existing_volume.full_name,
-        name=properties.volume.name,
+        name=existing_volume.full_name,
+        new_name=properties.volume.name,
         comment=properties.volume.comment,
     )
 
@@ -108,7 +108,7 @@ def delete_volume(properties: VolumeProperties, physical_resource_id: str) -> Cn
     """Delete a volume on databricks"""
     workspace_client = get_workspace_client(properties.workspace_url)
     try:
-        workspace_client.volumes.delete(full_name_arg=properties.volume.full_name)
+        workspace_client.volumes.delete(name=properties.volume.full_name)
     except NotFound:
         logger.warning("Volume not found, never existed or already removed")
 

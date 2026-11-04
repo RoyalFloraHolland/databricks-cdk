@@ -2,7 +2,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from databricks.sdk.core import Config
-from databricks.sdk.errors import NotFound
 from requests.exceptions import HTTPError
 from requests.models import Response
 
@@ -16,7 +15,6 @@ from databricks_cdk.utils import (
     get_client_secret,
     get_request,
     get_workspace_client,
-    is_not_found_error,
     patch_request,
     post_request,
     put_request,

@@ -8,8 +8,8 @@ from typing import Any, TypeVar
 import boto3
 from databricks.sdk import AccountClient, WorkspaceClient
 from databricks.sdk.core import Config
-from pydantic import BaseModel, ConfigDict
 from databricks.sdk.errors import NotFound
+from pydantic import BaseModel, ConfigDict
 from requests import request
 from requests.exceptions import HTTPError
 from tenacity import retry, retry_if_exception, retry_if_exception_type, stop_after_attempt, wait_exponential
