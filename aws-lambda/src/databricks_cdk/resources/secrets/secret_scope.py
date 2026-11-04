@@ -2,7 +2,7 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, get_request, post_request
+from databricks_cdk.utils import CnfResponse, get_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ def create_or_update_secret_scope(properties: SecretScopeProperties) -> CnfRespo
             "initial_manage_principal": properties.initial_manage_principal,
         }
         post_request(f"{url}/create", body=create_body)
+        wait_until_found(lambda: get_scope(properties), f"Secret scope {properties.scope}")
 
     return CnfResponse(physical_resource_id=properties.scope)
 
