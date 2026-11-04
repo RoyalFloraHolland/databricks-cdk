@@ -202,7 +202,7 @@ T = TypeVar("T")
 
 # The lambda runs timeout is set to 900s, every wait has to fit within a single invoke call
 DEFAULT_WAIT_TIMEOUT_SECONDS = 120
-WORKSPACE_WAIT_TIMEOUT_SECONDS = 840 # workspaces take longer to deploy, so increase timeout window
+WORKSPACE_WAIT_TIMEOUT_SECONDS = 840  # workspaces take longer to deploy, so increase timeout window
 
 
 class ResourceNotReadyError(Exception):
