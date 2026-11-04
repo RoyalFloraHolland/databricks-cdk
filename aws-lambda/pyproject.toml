@@ -40,7 +40,7 @@ dev = [
 ]
 dev-tools = [
     "ruff>=0.17.3",
-    "ty>=0.0.96",
+    "ty>=0.0.95",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -49,6 +49,9 @@ packages = ["src/databricks_cdk"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.uv]
+exclude-newer = "3 days"
 
 [tool.ruff]
 line-length = 120
