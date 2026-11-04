@@ -1,11 +1,14 @@
 import logging
 import os
+from collections.abc import Callable
 from functools import lru_cache
-from typing import Any
+from time import monotonic, sleep
+from typing import Any, TypeVar
 
 import boto3
 from databricks.sdk import AccountClient, WorkspaceClient
 from databricks.sdk.core import Config
+from databricks.sdk.errors import NotFound
 from pydantic import BaseModel
 from requests import request
 from requests.exceptions import HTTPError
@@ -193,3 +196,90 @@ def get_account_client(
         host=host,
         account_id=get_account_id(),
     )
+
+
+T = TypeVar("T")
+
+# The lambda runs timeout is set to 900s, every wait has to fit within a single invoke call
+DEFAULT_WAIT_TIMEOUT_SECONDS = 120
+WORKSPACE_WAIT_TIMEOUT_SECONDS = 840 # workspaces take longer to deploy, so increase timeout window
+
+
+class ResourceNotReadyError(Exception):
+    """Raised by a readiness check when a resource is not visible or usable yet"""
+
+
+def is_not_found_error(error: Exception) -> bool:
+    """Whether an error from the Databricks REST api or sdk means the requested resource does not exist"""
+    if isinstance(error, NotFound):
+        return True
+    if isinstance(error, HTTPError) and error.response is not None:
+        if error.response.status_code == 404:
+            return True
+        return "RESOURCE_DOES_NOT_EXIST" in error.response.text
+    return False
+
+
+def wait_until_ready[T](
+    check_fn: Callable[[], T],
+    description: str,
+    timeout_seconds: float = DEFAULT_WAIT_TIMEOUT_SECONDS,
+    initial_delay: float = 2,
+    max_delay: float = 30,
+) -> T:
+    """
+    Call check_fn until it stops raising ResourceNotReadyError, with exponential backoff between attempts.
+
+    Databricks resources can be invisible or unusable for a while after their create call returned. CloudFormation
+    starts creating dependent resources as soon as the lambda responds, so waiting here prevents those from failing.
+
+    :param check_fn: Returns the resource when it's ready, raises ResourceNotReadyError when it isn't yet
+    :param description: Name of the resource, used in logs and the timeout error
+    :param timeout_seconds: Maximum time to wait
+    :param initial_delay: Seconds to wait after the first failed check
+    :param max_delay: Upper bound for the time between two checks
+    :raises TimeoutError: If the resource is still not ready after timeout_seconds
+    :return: Result of check_fn
+    """
+    deadline = monotonic() + timeout_seconds
+    delay = initial_delay
+    while True:
+        try:
+            return check_fn()
+        except ResourceNotReadyError as e:
+            remaining = deadline - monotonic()
+            if remaining <= 0:
+                raise TimeoutError(f"{description} was not ready within {timeout_seconds}s: {e}") from e
+            sleep_seconds = min(delay, remaining)
+            logger.info(f"{description} is not ready yet ({e}), checking again in {sleep_seconds:.0f}s")
+            sleep(sleep_seconds)
+            delay = min(delay * 1.5, max_delay)
+
+
+def wait_until_found[T](
+    get_fn: Callable[[], T | None],
+    description: str,
+    timeout_seconds: float = DEFAULT_WAIT_TIMEOUT_SECONDS,
+) -> T:
+    """
+    Wait until get_fn returns the resource, treating both None and a not found error as not ready yet.
+
+    :param get_fn: Fetches the resource from Databricks
+    :param description: Name of the resource, used in logs and the timeout error
+    :param timeout_seconds: Maximum time to wait
+    :raises TimeoutError: If the resource is still not found after timeout_seconds
+    :return: Result of get_fn
+    """
+
+    def check() -> T:
+        try:
+            result = get_fn()
+        except Exception as e:
+            if is_not_found_error(e):
+                raise ResourceNotReadyError("not found") from e
+            raise
+        if result is None:
+            raise ResourceNotReadyError("not found")
+        return result
+
+    return wait_until_ready(check, description, timeout_seconds=timeout_seconds)
