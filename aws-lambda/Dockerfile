@@ -5,7 +5,7 @@
 # Pinned by digest and updated by Dependabot. Keep the version in sync with .github/actions/setup-uv/action.yml
 FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
 
-FROM public.ecr.aws/lambda/python:3.12 AS builder
+FROM public.ecr.aws/lambda/python:3.15 AS builder
 
 COPY --from=uv /uv /bin/uv
 
@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=src,target=src \
     uv pip install --python /var/lang/bin/python --target "${LAMBDA_TASK_ROOT}" --no-deps .
 
-FROM public.ecr.aws/lambda/python:3.12
+FROM public.ecr.aws/lambda/python:3.15
 
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 COPY src/databricks_cdk/handler.py ${LAMBDA_TASK_ROOT}
