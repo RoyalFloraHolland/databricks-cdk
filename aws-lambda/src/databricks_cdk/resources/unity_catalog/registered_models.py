@@ -8,7 +8,9 @@ from databricks_cdk.utils import CnfResponse, get_workspace_client
 
 logger = logging.getLogger(__name__)
 
-# The Unity Catalog API in the pinned SDK has no model tags, so they go through MLflow's Unity Catalog endpoints.
+# Model tags are not in the Unity Catalog API, so they go through MLflow's Unity Catalog endpoints.
+# See https://docs.databricks.com/database-objects/tags and
+# https://github.com/mlflow/mlflow/blob/master/mlflow/store/_unity_catalog/registry/rest_store.py
 MLFLOW_UC_MODELS_API = "/api/2.0/mlflow/unity-catalog/registered-models"
 
 
