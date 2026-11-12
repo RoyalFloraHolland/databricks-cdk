@@ -20,6 +20,7 @@ import { Construct } from "constructs";
 import { DockerImage } from "../docker-image";
 import {
     UnityCatalogVolume, UnityCatalogVolumeProperties,
+    UnityCatalogRegisteredModel, UnityCatalogRegisteredModelProperties,
     UnityCatalogCatalog,
     UnityCatalogCatalogProperties, UnityCatalogExternalLocation, UnityCatalogExternalLocationProperties,
     UnityCatalogMetastore,
@@ -211,6 +212,13 @@ export abstract class IDatabricksDeployLambda extends Construct {
 
     public createUnityCatalogVolume(scope: Construct, id: string, props: UnityCatalogVolumeProperties): UnityCatalogVolume {
         return new UnityCatalogVolume(scope, id, {
+            ...props,
+            serviceToken: this.serviceToken
+        });
+    }
+
+    public createUnityCatalogRegisteredModel(scope: Construct, id: string, props: UnityCatalogRegisteredModelProperties): UnityCatalogRegisteredModel {
+        return new UnityCatalogRegisteredModel(scope, id, {
             ...props,
             serviceToken: this.serviceToken
         });
