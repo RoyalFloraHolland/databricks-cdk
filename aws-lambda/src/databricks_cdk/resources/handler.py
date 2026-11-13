@@ -127,6 +127,11 @@ from databricks_cdk.resources.unity_catalog.permissions import (
     create_or_update_permissions,
     delete_permissions,
 )
+from databricks_cdk.resources.unity_catalog.registered_models import (
+    UnityCatalogRegisteredModelProperties,
+    create_or_update_unity_catalog_registered_model,
+    delete_unity_catalog_registered_model,
+)
 from databricks_cdk.resources.unity_catalog.schemas import SchemaProperties, create_or_update_schema, delete_schema
 from databricks_cdk.resources.unity_catalog.storage_credentials import (
     StorageCredentialsProperties,
@@ -230,6 +235,10 @@ def create_or_update_resource(event: DatabricksEvent) -> CnfResponse:
         )
     elif action == "volume":
         return create_or_update_volume(VolumeProperties(**event.ResourceProperties), event.PhysicalResourceId)
+    elif action == "unity-registered-model":
+        return create_or_update_unity_catalog_registered_model(
+            UnityCatalogRegisteredModelProperties(**event.ResourceProperties), event.PhysicalResourceId
+        )
     elif action == "service-principal":
         return create_or_update_service_principal(ServicePrincipalProperties(**event.ResourceProperties))
     elif action == "service-principal-secrets":
@@ -341,6 +350,10 @@ def delete_resource(event: DatabricksEvent) -> CnfResponse:
         )
     elif action == "volume":
         return delete_volume(VolumeProperties(**event.ResourceProperties), event.PhysicalResourceId)
+    elif action == "unity-registered-model":
+        return delete_unity_catalog_registered_model(
+            UnityCatalogRegisteredModelProperties(**event.ResourceProperties), event.PhysicalResourceId
+        )
     elif action == "service-principal":
         return delete_service_principal(
             ServicePrincipalProperties(**event.ResourceProperties), event.PhysicalResourceId

@@ -6,3 +6,4 @@ export * from "./unityCatalogPermission";
 export * from "./unityCatalogStorageCredentials";
 export * from "./unityCatalogExternalLocation";
 export * from "./unityCatalogVolume";
+export * from "./unityCatalogRegisteredModel";
