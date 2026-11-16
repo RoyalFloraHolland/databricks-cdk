@@ -37,6 +37,7 @@ import { ClusterPolicy, ClusterPolicyProperties } from "./cluster-policies";
 import { ClusterPolicyPermissions, ClusterPolicyPermissionsProperties } from "./permissions/cluster-policy-permissions";
 import { Token, TokenProperties } from "./tokens";
 import { Experiment, ExperimentProperties } from "./mlflow";
+import { ServingEndpoint, ServingEndpointProperties } from "./serving";
 import { RegisteredModel, RegisteredModelProps } from "./mlflow/registeredModel";
 import { ServicePrincipal, ServicePrincipalProperties, ServicePrincipalSecrets, ServicePrincipalSecretsProperties } from "./service-principals";
 
@@ -212,6 +213,13 @@ export abstract class IDatabricksDeployLambda extends Construct {
 
     public createUnityCatalogVolume(scope: Construct, id: string, props: UnityCatalogVolumeProperties): UnityCatalogVolume {
         return new UnityCatalogVolume(scope, id, {
+            ...props,
+            serviceToken: this.serviceToken
+        });
+    }
+
+    public createServingEndpoint(scope: Construct, id: string, props: ServingEndpointProperties): ServingEndpoint {
+        return new ServingEndpoint(scope, id, {
             ...props,
             serviceToken: this.serviceToken
         });

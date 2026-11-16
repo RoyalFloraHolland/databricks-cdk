@@ -100,6 +100,11 @@ from databricks_cdk.resources.service_principals.service_principal_secrets impor
     create_or_update_service_principal_secrets,
     delete_service_principal_secrets,
 )
+from databricks_cdk.resources.serving.serving_endpoints import (
+    ServingEndpointProperties,
+    create_or_update_serving_endpoint,
+    delete_serving_endpoint,
+)
 from databricks_cdk.resources.sql_warehouses.sql_warehouses import (
     SQLWarehouseProperties,
     create_or_update_warehouse,
@@ -239,6 +244,10 @@ def create_or_update_resource(event: DatabricksEvent) -> CnfResponse:
         return create_or_update_unity_catalog_registered_model(
             UnityCatalogRegisteredModelProperties(**event.ResourceProperties), event.PhysicalResourceId
         )
+    elif action == "serving-endpoint":
+        return create_or_update_serving_endpoint(
+            ServingEndpointProperties(**event.ResourceProperties), event.PhysicalResourceId
+        )
     elif action == "service-principal":
         return create_or_update_service_principal(ServicePrincipalProperties(**event.ResourceProperties))
     elif action == "service-principal-secrets":
@@ -354,6 +363,8 @@ def delete_resource(event: DatabricksEvent) -> CnfResponse:
         return delete_unity_catalog_registered_model(
             UnityCatalogRegisteredModelProperties(**event.ResourceProperties), event.PhysicalResourceId
         )
+    elif action == "serving-endpoint":
+        return delete_serving_endpoint(ServingEndpointProperties(**event.ResourceProperties), event.PhysicalResourceId)
     elif action == "service-principal":
         return delete_service_principal(
             ServicePrincipalProperties(**event.ResourceProperties), event.PhysicalResourceId

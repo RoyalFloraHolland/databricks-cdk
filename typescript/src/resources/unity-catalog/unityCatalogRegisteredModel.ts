@@ -30,7 +30,8 @@ export interface UnityCatalogRegisteredModelProperties {
     adopt_existing?: boolean
     /**
      * What happens to the model when it is removed from the stack or replaced.
-     * Deleting a model also deletes all of its versions, so the default is RETAIN.
+     * Defaults to RETAIN. With DESTROY, deleting fails while the model still has versions, because Unity Catalog
+     * only deletes empty models.
      */
     removalPolicy?: RemovalPolicy
 }

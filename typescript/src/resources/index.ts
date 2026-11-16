@@ -13,6 +13,7 @@ export * as warehouses from "./sql-warehouses";
 export * as unity_catalog from "./unity-catalog";
 export * as tokens from "./tokens";
 export * as mlflow from "./mlflow";
+export * as serving from "./serving";
 
 
 export * from "./account";
@@ -28,6 +29,7 @@ export * from "./secrets";
 export * from "./instance-pools";
 export * from "./sql-warehouses";
 export * from "./unity-catalog";
+export * from "./serving";
 export * from "./tokens";
 export * from "./mlflow";
 export * from "./service-principals";

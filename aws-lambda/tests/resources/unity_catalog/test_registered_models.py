@@ -2,10 +2,11 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 from databricks.sdk.errors import NotFound, ResourceAlreadyExists
-from databricks.sdk.service.catalog import RegisteredModelInfo
+from databricks.sdk.service.catalog import ModelVersionInfo, RegisteredModelInfo
 
 from databricks_cdk.resources.unity_catalog.registered_models import (
     RegisteredModelCreationError,
+    RegisteredModelDeletionError,
     RegisteredModelTag,
     UnityCatalogRegisteredModel,
     UnityCatalogRegisteredModelProperties,
@@ -285,3 +286,25 @@ def test_update_syncs_tags(workspace_client):
         "/api/2.0/mlflow/unity-catalog/registered-models/set-tag",
         body={"name": "catalog.schema.model", "key": "team", "value": "ds"},
     )
+
+
+@patch("databricks_cdk.resources.unity_catalog.registered_models.get_workspace_client")
+def test_delete_model_with_versions_fails_clearly(patched_get_workspace_client, workspace_client):
+    patched_get_workspace_client.return_value = workspace_client
+    workspace_client.model_versions.list.return_value = iter([ModelVersionInfo(version=1)])
+
+    with pytest.raises(RegisteredModelDeletionError, match="still has model versions"):
+        delete_unity_catalog_registered_model(_properties(), "catalog.schema.model")
+
+    workspace_client.registered_models.delete.assert_not_called()
+
+
+@patch("databricks_cdk.resources.unity_catalog.registered_models.get_workspace_client")
+def test_delete_model_already_gone_does_not_raise(patched_get_workspace_client, workspace_client):
+    patched_get_workspace_client.return_value = workspace_client
+    workspace_client.model_versions.list.side_effect = NotFound("missing")
+
+    response = delete_unity_catalog_registered_model(_properties(), "catalog.schema.model")
+
+    assert response == CnfResponse(physical_resource_id="catalog.schema.model")
+    workspace_client.registered_models.delete.assert_not_called()

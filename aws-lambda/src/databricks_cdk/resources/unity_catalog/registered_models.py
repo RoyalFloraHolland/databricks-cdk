@@ -18,9 +18,21 @@ class RegisteredModelCreationError(Exception):
     pass
 
 
+class RegisteredModelDeletionError(Exception):
+    pass
+
+
 class RegisteredModelTag(BaseModel):
     key: str
-    value: str
+    value: str = ""
+
+
+class MlflowRegisteredModel(BaseModel):
+    tags: list[RegisteredModelTag] = []
+
+
+class MlflowGetRegisteredModelResponse(BaseModel):
+    registered_model: MlflowRegisteredModel = MlflowRegisteredModel()
 
 
 class UnityCatalogRegisteredModel(BaseModel):
@@ -34,15 +46,13 @@ class UnityCatalogRegisteredModel(BaseModel):
 
     @property
     def full_name(self) -> str:
-        """The three-level (fully qualified) name of the registered model"""
         return f"{self.catalog_name}.{self.schema_name}.{self.name}"
 
 
 class UnityCatalogRegisteredModelProperties(BaseModel):
     workspace_url: str
     registered_model: UnityCatalogRegisteredModel
-    # Take over a model that already exists instead of failing. Off by default, so a typo or a name used by another
-    # project can't silently bring an existing model (and, with a DESTROY removal policy, its versions) under this stack.
+    # Off by default, so a typo or a name used by another project can't silently bring that model under this stack.
     adopt_existing: bool = False
 
 
@@ -53,14 +63,7 @@ class UnityCatalogRegisteredModelResponse(CnfResponse):
 def create_or_update_unity_catalog_registered_model(
     properties: UnityCatalogRegisteredModelProperties, physical_resource_id: str | None = None
 ) -> UnityCatalogRegisteredModelResponse:
-    """
-    Create or update a registered model in Unity Catalog. The physical_resource_id is the model's full name.
-
-    Only the model itself is managed here. Model versions and aliases are created by ML pipelines.
-
-    A change of name, catalog or schema creates a new model, which CloudFormation treats as a replacement.
-    Renaming in place is not supported because the pinned SDK sends the wrong field for it.
-    """
+    # Renaming in place isn't supported (the pinned SDK sends the wrong field), so a new name creates a new model.
     workspace_client = get_workspace_client(properties.workspace_url)
 
     if physical_resource_id is None or physical_resource_id != properties.registered_model.full_name:
@@ -72,10 +75,6 @@ def create_or_update_unity_catalog_registered_model(
 def create_unity_catalog_registered_model(
     properties: UnityCatalogRegisteredModelProperties, workspace_client: WorkspaceClient
 ) -> UnityCatalogRegisteredModelResponse:
-    """
-    Create a registered model in Unity Catalog.
-    If it already exists, it is adopted and its comment is updated when adopt_existing is set, otherwise this fails.
-    """
     model = properties.registered_model
     try:
         created = workspace_client.registered_models.create(
@@ -104,7 +103,6 @@ def create_unity_catalog_registered_model(
 def update_unity_catalog_registered_model(
     properties: UnityCatalogRegisteredModelProperties, workspace_client: WorkspaceClient
 ) -> UnityCatalogRegisteredModelResponse:
-    """Update the comment and tags of an existing registered model in Unity Catalog"""
     full_name = properties.registered_model.full_name
     try:
         workspace_client.registered_models.get(full_name=full_name)
@@ -123,15 +121,13 @@ def update_unity_catalog_registered_model(
 def sync_registered_model_tags(
     workspace_client: WorkspaceClient, full_name: str, tags: list[RegisteredModelTag] | None
 ) -> None:
-    """
-    Make the model's tags match the given list: set new and changed tags, and remove tags that are not in the list.
-    Does nothing when tags is None.
-    """
     if tags is None:
         return
 
-    response = workspace_client.api_client.do("GET", f"{MLFLOW_UC_MODELS_API}/get", query={"name": full_name})
-    current = {t["key"]: t.get("value", "") for t in response.get("registered_model", {}).get("tags", [])}
+    response = MlflowGetRegisteredModelResponse.parse_obj(
+        workspace_client.api_client.do("GET", f"{MLFLOW_UC_MODELS_API}/get", query={"name": full_name})
+    )
+    current = {t.key: t.value for t in response.registered_model.tags}
     desired = {t.key: t.value for t in tags}
 
     for key in current.keys() - desired.keys():
@@ -149,11 +145,6 @@ def sync_registered_model_tags(
 def delete_unity_catalog_registered_model(
     properties: UnityCatalogRegisteredModelProperties, physical_resource_id: str
 ) -> CnfResponse:
-    """
-    Delete a registered model in Unity Catalog, including all of its versions.
-
-    The CDK construct retains the model by default, so this only runs when the removal policy is set to DESTROY.
-    """
     if physical_resource_id != properties.registered_model.full_name:
         # After a failed create, CloudFormation rolls back with a placeholder id (the log stream name),
         # so there is no model to delete.
@@ -162,6 +153,11 @@ def delete_unity_catalog_registered_model(
 
     workspace_client = get_workspace_client(properties.workspace_url)
     try:
+        if next(iter(workspace_client.model_versions.list(full_name=physical_resource_id, max_results=1)), None):
+            raise RegisteredModelDeletionError(
+                f"Registered model {physical_resource_id} still has model versions and Unity Catalog only deletes "
+                "empty models. Delete the versions first, or use the RETAIN removal policy"
+            )
         workspace_client.registered_models.delete(full_name=physical_resource_id)
     except NotFound:
         logger.warning("Registered model not found, never existed or already removed")

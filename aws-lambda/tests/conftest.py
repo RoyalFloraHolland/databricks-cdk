@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from databricks.sdk import AccountClient, CredentialsAPI, ExperimentsAPI, ModelRegistryAPI, VolumesAPI, WorkspaceClient
-from databricks.sdk.service.catalog import RegisteredModelsAPI
+from databricks.sdk.service.catalog import ModelVersionsAPI, RegisteredModelsAPI
 from databricks.sdk.service.iam import AccountServicePrincipalsAPI, ServicePrincipalsAPI
 from databricks.sdk.service.oauth2 import ServicePrincipalSecretsAPI
 
@@ -28,6 +28,7 @@ def workspace_client():
     workspace_client.experiments = MagicMock(spec=ExperimentsAPI)
     workspace_client.volumes = MagicMock(spec=VolumesAPI)
     workspace_client.registered_models = MagicMock(spec=RegisteredModelsAPI)
+    workspace_client.model_versions = MagicMock(spec=ModelVersionsAPI)
     workspace_client.service_principals = MagicMock(spec=ServicePrincipalsAPI)
 
     return workspace_client
