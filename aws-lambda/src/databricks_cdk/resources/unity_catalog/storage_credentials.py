@@ -70,7 +70,7 @@ def create_or_update_storage_credential(
     """Create storage_credentials at databricks"""
     base_url = get_storage_credential_url(properties.workspace_url)
     current = get_storage_credential_by_name(properties.storage_credential.name, base_url=base_url)
-    body = json.loads(properties.storage_credential.json())
+    body = json.loads(properties.storage_credential.model_dump_json())
     if current is None:
         response = post_request(base_url, body=body)
     else:

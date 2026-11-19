@@ -31,7 +31,7 @@ class TokenProperties(BaseModel):
 
 
 class TokenCreateReponse(CnfResponse):
-    token_secrets_arn = str
+    token_secrets_arn: str
     creation_time: int
     expiry_time: int
     comment: str
@@ -42,7 +42,7 @@ def get_existing_tokens(token_url: str) -> list[TokenInfo]:
     response = get_request(f"{token_url}/list")
 
     if response:
-        return TokenList.parse_obj(response).token_infos
+        return TokenList.model_validate(response).token_infos
 
     return []
 

@@ -19,6 +19,6 @@ class SubmitJobEvent(BaseModel):
 
 
 def handler(event, context):
-    parsed_event = SubmitJobEvent.parse_obj(event)
+    parsed_event = SubmitJobEvent.model_validate(event)
     url = f"{parsed_event.workspace_url}/api/2.1/jobs/run-now"
-    return post_request(url, body=parsed_event.job_args.dict())
+    return post_request(url, body=parsed_event.job_args.model_dump())

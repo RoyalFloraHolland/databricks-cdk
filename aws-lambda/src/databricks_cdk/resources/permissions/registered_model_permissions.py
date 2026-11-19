@@ -42,7 +42,7 @@ def create_or_update_registered_model_permissions(properties: RegisteredModelPer
     Creates and updates the permissions on an existing registered model. It overwrites any existing
     permissions
     """
-    body = {"access_control_list": [a.dict() for a in properties.access_control_list]}
+    body = {"access_control_list": [a.model_dump() for a in properties.access_control_list]}
 
     put_request(
         f"{get_registered_model_permissions_url(properties.workspace_url, properties.registered_model_id)}", body

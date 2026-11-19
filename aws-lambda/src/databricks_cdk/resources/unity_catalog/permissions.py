@@ -75,7 +75,7 @@ def create_or_update_permissions(
     current = PermissionsList(**get_request(base_url))
     diff = create_diff(current=current, new=properties.permissions)
     if len(diff.changes) > 0:
-        patch_request(base_url, body=json.loads(diff.json()))
+        patch_request(base_url, body=json.loads(diff.model_dump_json()))
     return PermissionsResponse(
         sec_id=properties.sec_id,
         sec_type=properties.sec_type,
@@ -89,5 +89,5 @@ def delete_permissions(properties: PermissionsProperties, physical_resource_id: 
     current = PermissionsList(**get_request(base_url))
     diff = create_diff(current=current, new=PermissionsList(privilege_assignments=[]))
     if len(diff.changes) > 0:
-        patch_request(base_url, body=json.loads(diff.json()))
+        patch_request(base_url, body=json.loads(diff.model_dump_json()))
     return CnfResponse(physical_resource_id=physical_resource_id)

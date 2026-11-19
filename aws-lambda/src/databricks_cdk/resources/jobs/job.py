@@ -1,7 +1,7 @@
 import json
 import logging
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from requests.exceptions import HTTPError
 
 from databricks_cdk.utils import CnfResponse, get_request, post_request
@@ -146,7 +146,7 @@ OPTIONAL_JOB_FIELDS = {"trigger", "description", "queue", "parameters", "tags"}
 class JobTaskSettings(BaseModel):
     task_key: str
     description: str | None = None
-    depends_on: list[TaskDependency] = []
+    depends_on: list[TaskDependency] = Field(default_factory=list)
     run_if: str | None = None
     existing_cluster_id: str | None = None
     new_cluster: NewCluster | None = None
@@ -166,7 +166,8 @@ class JobTaskSettings(BaseModel):
     min_retry_interval_millis: int | None = None
     retry_on_timeout: bool = False
 
-    @validator("depends_on", pre=True, each_item=True)
+    @field_validator("depends_on", mode="before")
+    @classmethod
     def task_key_to_dependency(cls, value):
         # depends_on used to be a list of task keys, which the Jobs API rejects
         return {"task_key": value} if isinstance(value, str) else value
@@ -212,7 +213,8 @@ class TriggerSettings(BaseModel):
     file_arrival: FileArrivalTriggerConfiguration | None = None
     table_update: TableUpdateTriggerConfiguration | None = None
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def check_one_trigger_type(cls, values: dict) -> dict:
         trigger_types = [name for name in ("file_arrival", "table_update") if values.get(name) is not None]
         if len(trigger_types) != 1:
@@ -250,7 +252,7 @@ class JobSettings(BaseModel):
     job_clusters: list[JobCluster] = []
     email_notifications: JobEmailNotifications | None = None
     timeout_seconds: int | None = None
-    schedule: CronSchedule | None
+    schedule: CronSchedule | None = None
     trigger: TriggerSettings | None = None
     queue: QueueSettings | None = None
     parameters: list[JobParameterDefinition] | None = None
@@ -292,18 +294,20 @@ def job_settings_body(job: JobSettings) -> dict:
     unset fields: a trigger carries exactly one trigger type, and a task carries exactly one task type.
     The body of jobs that don't use them is unchanged.
     """
-    body = json.loads(job.json(exclude={"tasks"} | OPTIONAL_JOB_FIELDS))
+    body = json.loads(job.model_dump_json(exclude={"tasks"} | OPTIONAL_JOB_FIELDS))
     for field in OPTIONAL_JOB_FIELDS:
         if getattr(job, field) is not None:
-            body[field] = json.loads(job.json(include={field}, exclude_none=True))[field]
+            body[field] = json.loads(job.model_dump_json(include={field}, exclude_none=True))[field]
 
     body["tasks"] = []
     for task in job.tasks:
-        task_body = json.loads(task.json(exclude=OPTIONAL_TASK_FIELDS))
-        task_body["depends_on"] = [json.loads(dependency.json(exclude_none=True)) for dependency in task.depends_on]
+        task_body = json.loads(task.model_dump_json(exclude=OPTIONAL_TASK_FIELDS))
+        task_body["depends_on"] = [
+            json.loads(dependency.model_dump_json(exclude_none=True)) for dependency in task.depends_on
+        ]
         for field in OPTIONAL_TASK_FIELDS:
             if getattr(task, field) is not None:
-                task_body[field] = json.loads(task.json(include={field}, exclude_none=True))[field]
+                task_body[field] = json.loads(task.model_dump_json(include={field}, exclude_none=True))[field]
         body["tasks"].append(task_body)
     return body
 

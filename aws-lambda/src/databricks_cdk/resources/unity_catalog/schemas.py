@@ -49,7 +49,7 @@ def create_or_update_schema(properties: SchemaProperties) -> SchemaResponse:
             properties.schema_object.name,
             base_url=base_url,
         )
-    body = json.loads(properties.schema_object.json())
+    body = json.loads(properties.schema_object.model_dump_json())
 
     if current is None:
         post_request(
