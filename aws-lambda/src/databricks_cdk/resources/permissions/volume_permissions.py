@@ -19,7 +19,7 @@ class VolumePermissionsProperties(BaseModel):
 def _get_volume_grants(workspace_client: WorkspaceClient, full_name: str) -> list[PrivilegeAssignment]:
     grants = []
     while True:
-        response = workspace_client.grants.get(securable_type=SecurableType.VOLUME, full_name=full_name)
+        response = workspace_client.grants.get(securable_type=SecurableType.VOLUME.value, full_name=full_name)
         grants.extend(response.privilege_assignments or [])
         if not response.next_page_token:
             break
@@ -37,7 +37,7 @@ def create_or_update_volume_permissions(
     permission_changes = get_permission_changes(existing_grants, properties.privilege_assignments)
 
     workspace_client.grants.update(
-        securable_type=SecurableType.VOLUME,
+        securable_type=SecurableType.VOLUME.value,
         full_name=properties.volume_name,
         changes=permission_changes,
     )
@@ -55,7 +55,7 @@ def delete_volume_permissions(properties: VolumePermissionsProperties, physical_
     permission_changes = get_permission_changes(existing_grants, [])
 
     workspace_client.grants.update(
-        securable_type=SecurableType.VOLUME,
+        securable_type=SecurableType.VOLUME.value,
         full_name=properties.volume_name,
         changes=permission_changes,
     )
