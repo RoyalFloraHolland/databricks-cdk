@@ -25,7 +25,7 @@ def test_get_experiment_permissions_url():
 @patch("databricks_cdk.resources.permissions.registered_model_permissions.put_request")
 def test_create_or_update_experiment_permissions(patched_put_request):
     props = RegisteredModelPermissionPermissionProperties(
-        registered_model_id=1234,
+        registered_model_id="1234",
         workspace_url="https://test.cloud.databricks.com",
         access_control_list=[
             UserPermission(user_name="test@test.com", permission_level=RegisteredModelPermission.CAN_EDIT),
@@ -70,7 +70,7 @@ def test_create_or_update_experiment_permissions(patched_put_request):
 @patch("databricks_cdk.resources.permissions.registered_model_permissions.put_request")
 def test_delete_experiment_permissions(patched_put_request):
     props = RegisteredModelPermissionPermissionProperties(
-        registered_model_id=1234,
+        registered_model_id="1234",
         workspace_url="https://test.cloud.databricks.com",
         access_control_list=[
             UserPermission(user_name="test@test.com", permission_level=RegisteredModelPermission.CAN_EDIT),
@@ -81,7 +81,7 @@ def test_delete_experiment_permissions(patched_put_request):
         ],
     )
 
-    response = delete_registered_model_permissions(props, 1234)
+    response = delete_registered_model_permissions(props, "1234")
 
     assert isinstance(response, CnfResponse)
     assert response.physical_resource_id == "1234/permissions"

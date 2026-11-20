@@ -401,7 +401,7 @@ def handler(event, context):
             event,
             context,
             cfnresponse.SUCCESS,
-            response_data.dict(),
+            response_data.model_dump(),
             physicalResourceId=response_data.physical_resource_id,
         )
     except Exception as e:

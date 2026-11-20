@@ -8,7 +8,7 @@ from databricks_cdk.utils import CnfResponse, get_workspace_client
 class RegisteredModelProperties(BaseModel):
     name: str
     tags: list[ModelTag] | None = []
-    description: str | None
+    description: str | None = None
     workspace_url: str
 
 

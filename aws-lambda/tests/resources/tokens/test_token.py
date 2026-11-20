@@ -91,7 +91,7 @@ def test_create_token_already_exist(
         TokenInfo(token_id="existing", creation_time=1, expiry_time=2, comment="blah")
     ]
 
-    patched_update_token_to_secrets_manager.return_value = {"ARN": "fake_arn"}
+    patched_update_token_to_secrets_manager.return_value = "fake_arn"
 
     response = create_or_update_token(token_properties, physical_resource_id="existing")
 

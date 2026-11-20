@@ -29,10 +29,10 @@ def create_or_update_job_permissions(
     """Create job permissions on job at databricks"""
 
     # Json data
-    access_control_list = [a.dict() for a in properties.access_control_list]
+    access_control_list = [a.model_dump() for a in properties.access_control_list]
     # Always add owner
 
-    owner_dict = properties.owner.dict()
+    owner_dict = properties.owner.model_dump()
     owner_dict["permission_level"] = "IS_OWNER"
     access_control_list.append(owner_dict)
 
@@ -52,7 +52,7 @@ def delete_job_permissions(properties: JobPermissionsProperties, physical_resour
     """Deletes all job permissions on job at databricks"""
     # remove everything but the owner permission
     access_control_list = []
-    owner_dict = properties.owner.dict()
+    owner_dict = properties.owner.model_dump()
     owner_dict["permission_level"] = "IS_OWNER"
     access_control_list.append(owner_dict)
 

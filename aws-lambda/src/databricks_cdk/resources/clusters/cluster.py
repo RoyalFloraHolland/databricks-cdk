@@ -103,14 +103,14 @@ def create_or_update_cluster(properties: ClusterProperties, physical_resource_id
         current = get_cluster_by_id(physical_resource_id, properties.workspace_url)
     if current is None:
         # Json data
-        body = properties.cluster.dict()
+        body = properties.cluster.model_dump()
         response = post_request(f"{get_cluster_url(properties.workspace_url)}/create", body=body)
         return CnfResponse(
             physical_resource_id=response["cluster_id"],
         )
     else:
         cluster_id = current["cluster_id"]
-        body = properties.cluster.dict()
+        body = properties.cluster.model_dump()
         body["cluster_id"] = cluster_id
         post_request(f"{get_cluster_url(properties.workspace_url)}/edit", body=body)
         return CnfResponse(

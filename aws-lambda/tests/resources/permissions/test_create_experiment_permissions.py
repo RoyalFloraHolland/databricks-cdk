@@ -23,7 +23,7 @@ def test_get_experiment_permissions_url():
 @patch("databricks_cdk.resources.permissions.experiment_permissions.put_request")
 def test_create_or_update_experiment_permissions(patched_put_request):
     props = ExperimentPermissionProperties(
-        experiment_id=1234,
+        experiment_id="1234",
         workspace_url="https://test.cloud.databricks.com",
         access_control_list=[
             UserPermission(user_name="test@test.com", permission_level=ExperimentPermission.CAN_EDIT),
@@ -54,7 +54,7 @@ def test_create_or_update_experiment_permissions(patched_put_request):
 @patch("databricks_cdk.resources.permissions.experiment_permissions.put_request")
 def test_delete_experiment_permissions(patched_put_request):
     props = ExperimentPermissionProperties(
-        experiment_id=1234,
+        experiment_id="1234",
         workspace_url="https://test.cloud.databricks.com",
         access_control_list=[
             UserPermission(user_name="test@test.com", permission_level=ExperimentPermission.CAN_EDIT),

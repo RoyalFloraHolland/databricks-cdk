@@ -61,7 +61,7 @@ def _api(
                 raise NotFound("missing")
             return existing
         if method == "GET" and path == "/api/2.1/unity-catalog/models/catalog.schema.model/aliases/champion":
-            return {"version": int(alias_version)}
+            return {"version": alias_version}
         if method == "PUT" and put_error is not None:
             raise put_error
         return {}

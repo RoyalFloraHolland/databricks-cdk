@@ -69,7 +69,7 @@ def create_or_update_workspaces(properties: WorkspaceProperties) -> WorkspaceRes
     if current is None:
         logger.info("Workspace not found yet, creating now")
         # Json data
-        body = properties.dict()
+        body = properties.model_dump()
         del body["action"]
         response = post_request(url, body=body)
         workspace_id = response["workspace_id"]

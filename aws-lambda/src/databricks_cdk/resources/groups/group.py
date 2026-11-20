@@ -61,7 +61,7 @@ def create_or_update_group(properties: GroupProperties) -> GroupResponse:
     for member in properties.members:
         if member not in current.members:
             # Adding users that does not exists in group
-            add_member_body = member.dict()
+            add_member_body = member.model_dump()
             add_member_body["parent_name"] = properties.group_name
             post_request(
                 f"{get_groups_url(properties.workspace_url)}/add-member",
@@ -70,7 +70,7 @@ def create_or_update_group(properties: GroupProperties) -> GroupResponse:
     for member in current.members:
         # Removing members from group
         if member not in properties.members:
-            remove_member_body = member.dict()
+            remove_member_body = member.model_dump()
             remove_member_body["parent_name"] = properties.group_name
             post_request(
                 f"{get_groups_url(properties.workspace_url)}/remove-member",

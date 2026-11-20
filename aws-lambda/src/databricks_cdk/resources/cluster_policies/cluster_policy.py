@@ -13,14 +13,14 @@ Value = int | bool | str
 
 class PolicyElement(BaseModel):
     type: str
-    value: Value | None
-    hidden: bool | None
-    defaultValue: Value | None
-    isOptional: bool | None
-    minValue: int | None
-    maxValue: int | None
-    values: list[Value] | None
-    pattern: str | None
+    value: Value | None = None
+    hidden: bool | None = None
+    defaultValue: Value | None = None
+    isOptional: bool | None = None
+    minValue: int | None = None
+    maxValue: int | None = None
+    values: list[Value] | None = None
+    pattern: str | None = None
 
 
 class ClusterPolicy(BaseModel):
@@ -52,7 +52,7 @@ def create_or_update_cluster_policy(
     """Create cluster policy at databricks"""
     current = None
     base_url = get_cluster_policy_url(properties.workspace_url)
-    body = json.loads(properties.cluster_policy.json(exclude_none=True))
+    body = json.loads(properties.cluster_policy.model_dump_json(exclude_none=True))
     body["definition"] = json.dumps(body["definition"])
 
     if physical_resource_id is not None:

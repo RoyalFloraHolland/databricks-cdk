@@ -40,11 +40,11 @@ def create_or_update_catalog(properties: CatalogProperties) -> CatalogResponse:
     if current is None:
         current = get_catalog_by_name(properties.catalog.name, base_url=base_url)
     if current is None:
-        post_request(base_url, body=json.loads(properties.catalog.json()))
+        post_request(base_url, body=json.loads(properties.catalog.model_dump_json()))
     else:
         patch_request(
             f"{base_url}/{properties.catalog.name}",
-            body=json.loads(properties.catalog.json()),
+            body=json.loads(properties.catalog.model_dump_json()),
         )
     return CatalogResponse(
         name=properties.catalog.name,

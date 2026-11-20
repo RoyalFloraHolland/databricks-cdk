@@ -4,7 +4,7 @@ from typing import Any, cast
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound, ResourceConflict
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from databricks_cdk.utils import CnfResponse, get_workspace_client
 
@@ -63,12 +63,13 @@ class ServedEntityConfig(BaseModel):
     scale_to_zero_enabled: bool = False
     environment_vars: dict[str, str] | None = None
 
-    @validator("environment_vars")
+    @field_validator("environment_vars")
+    @classmethod
     def empty_is_none(cls, value):
         return value or None
 
     def same_deployment(self, other: "ServedEntityConfig") -> bool:
-        return self.dict(exclude={"name"}) == other.dict(exclude={"name"})
+        return self.model_dump(exclude={"name"}) == other.model_dump(exclude={"name"})
 
 
 class Route(BaseModel):
@@ -150,7 +151,8 @@ class ServedEntity(BaseModel):
     scale_to_zero_enabled: bool = False
     environment_vars: dict[str, str] | None = None
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def one_of_version_or_alias(cls, values):
         if (values.get("entity_version") is None) == (values.get("alias") is None):
             raise ValueError("Set exactly one of entity_version or alias")
@@ -216,14 +218,14 @@ def _get(workspace_client: WorkspaceClient, path: str) -> dict[str, Any]:
 
 def get_serving_endpoint(workspace_client: WorkspaceClient, name: str) -> ServingEndpointDetails | None:
     try:
-        return ServingEndpointDetails.parse_obj(_get(workspace_client, f"{SERVING_ENDPOINTS_API}/{name}"))
+        return ServingEndpointDetails.model_validate(_get(workspace_client, f"{SERVING_ENDPOINTS_API}/{name}"))
     except NotFound:
         return None
 
 
 def resolve_alias(workspace_client: WorkspaceClient, entity_name: str, alias: str) -> str:
     response = _get(workspace_client, f"{UC_MODELS_API}/{entity_name}/aliases/{alias}")
-    return ModelVersionByAlias.parse_obj(response).version
+    return ModelVersionByAlias.model_validate(response).version
 
 
 def create_serving_endpoint(
@@ -235,7 +237,7 @@ def create_serving_endpoint(
         config=EndpointConfig.serving(properties.served_entity.to_config(version)),
         tags=properties.tags,
     )
-    workspace_client.api_client.do("POST", SERVING_ENDPOINTS_API, body=request.dict(exclude_none=True))
+    workspace_client.api_client.do("POST", SERVING_ENDPOINTS_API, body=request.model_dump(exclude_none=True))
 
     return ServingEndpointResponse(name=properties.name, entity_version=version, physical_resource_id=properties.name)
 
@@ -278,7 +280,7 @@ def _apply_config(
         workspace_client.api_client.do(
             "PUT",
             f"{SERVING_ENDPOINTS_API}/{existing.name}/config",
-            body=EndpointConfig.serving(desired).dict(exclude_none=True),
+            body=EndpointConfig.serving(desired).model_dump(exclude_none=True),
         )
     except ResourceConflict as e:
         raise EndpointUpdateInProgressError(existing.name) from e
@@ -289,7 +291,7 @@ def sync_serving_endpoint_tags(
 ) -> None:
     request = PatchTagsRequest.between(current, desired)
     if not request.is_empty:
-        workspace_client.api_client.do("PATCH", f"{SERVING_ENDPOINTS_API}/{name}/tags", body=request.dict())
+        workspace_client.api_client.do("PATCH", f"{SERVING_ENDPOINTS_API}/{name}/tags", body=request.model_dump())
 
 
 def delete_serving_endpoint(properties: ServingEndpointProperties, physical_resource_id: str) -> CnfResponse:

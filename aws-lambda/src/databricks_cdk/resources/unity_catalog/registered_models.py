@@ -124,7 +124,7 @@ def sync_registered_model_tags(
     if tags is None:
         return
 
-    response = MlflowGetRegisteredModelResponse.parse_obj(
+    response = MlflowGetRegisteredModelResponse.model_validate(
         workspace_client.api_client.do("GET", f"{MLFLOW_UC_MODELS_API}/get", query={"name": full_name})
     )
     current = {t.key: t.value for t in response.registered_model.tags}

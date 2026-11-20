@@ -64,9 +64,9 @@ def create_or_update_metastore(properties: MetastoreProperties, physical_resourc
         current = get_metastore_by_name(properties.metastore.name, base_url=base_url)
     if current is None:
         # create metastore
-        current = post_request(base_url, body=json.loads(properties.metastore.json()))
+        current = post_request(base_url, body=json.loads(properties.metastore.model_dump_json()))
     metastore_id = current.get("metastore_id")
-    body = json.loads(properties.metastore.json())
+    body = json.loads(properties.metastore.model_dump_json())
     body["storage_root_credential_id"] = credential_result.storage_credential_id
     if current.get("storage_root").startswith(properties.metastore.storage_root):
         del body["storage_root"]

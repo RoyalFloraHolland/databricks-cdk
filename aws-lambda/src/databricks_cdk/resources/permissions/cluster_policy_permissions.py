@@ -27,7 +27,7 @@ def create_or_update_cluster_policy_permissions(
 
     # Json data
     body = {
-        "access_control_list": [a.dict() for a in properties.access_control_list],
+        "access_control_list": [a.model_dump() for a in properties.access_control_list],
     }
     put_request(
         f"{get_cluster_policy_permissions_url(properties.workspace_url, properties.cluster_policy_id)}",

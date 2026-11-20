@@ -83,7 +83,7 @@ def create_or_update_warehouse(properties: SQLWarehouseProperties, physical_reso
     current = get_warehouse_by_name(warehouse_properties.name, properties.workspace_url)
 
     if current is None:
-        create_response = post_request(url=url, body=warehouse_properties.dict())
+        create_response = post_request(url=url, body=warehouse_properties.model_dump())
         warehouse_id = create_response.get("id")
         return SQLWarehouseResponse(id=warehouse_id, physical_resource_id=warehouse_id)
     else:
@@ -102,7 +102,7 @@ def create_or_update_warehouse(properties: SQLWarehouseProperties, physical_reso
             channel=warehouse_properties.channel,
         )
 
-        post_request(f"{url}{warehouse_id}/edit", body=warehouse_edit.dict())
+        post_request(f"{url}{warehouse_id}/edit", body=warehouse_edit.model_dump())
         return SQLWarehouseResponse(id=warehouse_id, physical_resource_id=warehouse_id)
 
 

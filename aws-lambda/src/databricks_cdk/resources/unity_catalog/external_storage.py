@@ -44,7 +44,7 @@ def create_or_update_external_location(
     """Create external_locations at databricks"""
     base_url = get_external_location_url(properties.workspace_url)
     current = get_external_location_by_name(properties.external_location.name, base_url=base_url)
-    body = json.loads(properties.external_location.json())
+    body = json.loads(properties.external_location.model_dump_json())
     if current is None:
         post_request(base_url, body=body)
     else:

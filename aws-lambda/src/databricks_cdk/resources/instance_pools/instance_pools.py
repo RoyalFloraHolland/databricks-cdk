@@ -78,7 +78,7 @@ def create_or_update_instance_pool(properties: InstancePoolProperties, physical_
         current = get_instance_pool_by_id(physical_resource_id, properties.workspace_url)
 
     if current is None:
-        create_response = post_request(f"{url}/create", body=instance_pool_properties.dict())
+        create_response = post_request(f"{url}/create", body=instance_pool_properties.model_dump())
         instance_pool_id = create_response.get("instance_pool_id")
         return InstancePoolResponse(instance_pool_id=instance_pool_id, physical_resource_id=instance_pool_id)
     else:
@@ -91,7 +91,7 @@ def create_or_update_instance_pool(properties: InstancePoolProperties, physical_
             idle_instance_autotermination_minutes=instance_pool_properties.idle_instance_autotermination_minutes,
         )
 
-        post_request(f"{url}/edit", body=instance_pool_edit.dict())
+        post_request(f"{url}/edit", body=instance_pool_edit.model_dump())
         return InstancePoolResponse(instance_pool_id=instance_pool_id, physical_resource_id=instance_pool_id)
 
 

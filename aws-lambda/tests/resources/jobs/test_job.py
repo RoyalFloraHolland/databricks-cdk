@@ -99,14 +99,16 @@ def test_job_settings_body_run_job_chain():
 def test_job_settings_parses_run_job_chain_from_cloudformation_properties():
     properties = JobProperties(
         workspace_url="https://test.cloud.databricks.com",
-        job={
-            "name": "chain",
-            "tasks": [
-                {"task_key": "first", "run_job_task": {"job_id": "123"}},
-                {"task_key": "second", "depends_on": ["first"], "run_job_task": {"job_id": "456"}},
-            ],
-            "queue": {"enabled": "true"},
-        },
+        job=JobSettings.model_validate(
+            {
+                "name": "chain",
+                "tasks": [
+                    {"task_key": "first", "run_job_task": {"job_id": "123"}},
+                    {"task_key": "second", "depends_on": [{"task_key": "first"}], "run_job_task": {"job_id": "456"}},
+                ],
+                "queue": {"enabled": "true"},
+            }
+        ),
     )
 
     first, second = properties.job.tasks
@@ -187,7 +189,7 @@ def test_job_properties_rejects_invalid_trigger_from_cloudformation_properties()
 @patch("databricks_cdk.resources.jobs.job.post_request")
 @patch("databricks_cdk.resources.jobs.job.get_job_by_id")
 def test_create_or_update_job_resets_with_trigger(patched_get_job_by_id, patched_post_request):
-    patched_get_job_by_id.return_value = {"job_id": 123}
+    patched_get_job_by_id.return_value = {"job_id": "123"}
     trigger = TriggerSettings(file_arrival=FileArrivalTriggerConfiguration(url="/Volumes/catalog/schema/volume/"))
     properties = JobProperties(workspace_url="https://test.cloud.databricks.com", job=get_job_settings(trigger))
 
@@ -197,7 +199,7 @@ def test_create_or_update_job_resets_with_trigger(patched_get_job_by_id, patched
     url = patched_post_request.call_args.args[0]
     body = patched_post_request.call_args.kwargs["body"]
     assert url.endswith("/reset")
-    assert body["job_id"] == 123
+    assert body["job_id"] == "123"
     assert body["new_settings"]["trigger"] == {"file_arrival": {"url": "/Volumes/catalog/schema/volume/"}}
 
 

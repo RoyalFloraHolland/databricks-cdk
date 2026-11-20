@@ -40,7 +40,7 @@ def create_or_update_experiment_permissions(properties: ExperimentPermissionProp
     Creates and updates the permissions on an existing experiment. It overwrites any existing
     permissions
     """
-    body = {"access_control_list": [a.dict() for a in properties.access_control_list]}
+    body = {"access_control_list": [a.model_dump() for a in properties.access_control_list]}
 
     put_request(f"{get_experiment_permissions_url(properties.workspace_url, properties.experiment_id)}", body)
 
