@@ -1,9 +1,10 @@
-from databricks.sdk.service.catalog import PermissionsChange, PermissionsList, Privilege, PrivilegeAssignment
+from databricks.sdk.service.catalog import PermissionsChange, Privilege, PrivilegeAssignment
 
 
-def get_assignment_dict_from_permissions_list(permissions_list: PermissionsList) -> dict[str, list[Privilege]]:
-    """Converts PermissionsList to dict with key of principal and list of associated privileges as value"""
-    privilige_assignments = permissions_list.privilege_assignments
+def get_assignment_dict_from_permissions_list(
+    privilige_assignments: list[PrivilegeAssignment] | None,
+) -> dict[str, list[Privilege]]:
+    """Converts list[PrivilegeAssignment] to dict with key of principal and list of associated privileges as value"""
 
     if privilige_assignments is None:
         return {}
@@ -69,7 +70,7 @@ def get_permission_changes_assignments_changed(
 
 
 def get_permission_changes(
-    assignments_on_databricks: PermissionsList, assignments_from_properties: list[PrivilegeAssignment]
+    assignments_on_databricks: list[PrivilegeAssignment], assignments_from_properties: list[PrivilegeAssignment]
 ) -> list[PermissionsChange]:
     """Get the changes between the existing grants and the new grants and create PermissionsChange object"""
     # Convert to dict for easier lookup

@@ -20,7 +20,7 @@ from databricks_cdk.utils import CnfResponse
 
 @patch("databricks_cdk.resources.account.credentials.get_account_client")
 def test_create_credentials_non_existing(patched_get_account_client, account_client):
-    aws_credentials = AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx", external_id="test"))
+    aws_credentials = AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx"))
     account_client.credentials.create.return_value = Credential(
         credentials_id="2206cf0e-ddeb-4982-a6d1-28bc887c8479",
         credentials_name="test",
@@ -42,7 +42,7 @@ def test_create_credentials_non_existing(patched_get_account_client, account_cli
         credentials_name="test",
         credentials_id="2206cf0e-ddeb-4982-a6d1-28bc887c8479",
         role_arn="arn:aws:iam::xxxxxx:role/xxx",
-        external_id="test",
+        external_id=None,
         creation_time=0,
     )
     account_client.credentials.create.assert_called_once_with(
@@ -55,7 +55,7 @@ def test_create_credentials_non_existing(patched_get_account_client, account_cli
 
 @patch("databricks_cdk.resources.account.credentials.get_account_client")
 def test_create_credentials_exists(patched_get_account_client, account_client):
-    aws_credentials = AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx", external_id="test"))
+    aws_credentials = AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx"))
     current = Credential(
         credentials_id="2206cf0e-ddeb-4982-a6d1-28bc887c8479",
         credentials_name="test",
@@ -78,7 +78,7 @@ def test_create_credentials_exists(patched_get_account_client, account_client):
         credentials_name="test",
         credentials_id="2206cf0e-ddeb-4982-a6d1-28bc887c8479",
         role_arn="arn:aws:iam::xxxxxx:role/xxx",
-        external_id="test",
+        external_id=None,
         creation_time=0,
     )
 
@@ -91,7 +91,7 @@ def test_create_credentials_different_role_arn(patched_get_account_client, accou
     current = Credential(
         credentials_id="2206cf0e-ddeb-4982-a6d1-28bc887c8479",
         credentials_name="test",
-        aws_credentials=AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx", external_id="test")),
+        aws_credentials=AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx")),
         creation_time=0,
         account_id="1234",
     )
@@ -117,7 +117,7 @@ def test_delete_credentials(patched_get_account_client, account_client):
     current = Credential(
         credentials_id="2206cf0e-ddeb-4982-a6d1-28bc887c8479",
         credentials_name="test",
-        aws_credentials=AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx", external_id="test")),
+        aws_credentials=AwsCredentials(sts_role=StsRole(role_arn="arn:aws:iam::xxxxxx:role/xxx")),
         creation_time=0,
         account_id="1234",
     )
