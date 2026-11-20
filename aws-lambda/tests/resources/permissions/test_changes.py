@@ -1,4 +1,4 @@
-from databricks.sdk.service.catalog import PermissionsChange, PermissionsList, Privilege, PrivilegeAssignment
+from databricks.sdk.service.catalog import PermissionsChange, Privilege, PrivilegeAssignment
 
 from databricks_cdk.resources.permissions.changes import (
     get_assignment_dict_from_permissions_list,
@@ -10,12 +10,10 @@ from databricks_cdk.resources.permissions.changes import (
 
 
 def test_get_assignment_dict_from_permissions_list():
-    permissions_list = PermissionsList(
-        privilege_assignments=[
-            PrivilegeAssignment(principal="principal1", privileges=["APPLY_TAG", "WRITE_FILES"]),
-            PrivilegeAssignment(principal="principal2", privileges=["READ_FILES"]),
-        ]
-    )
+    permissions_list = [
+        PrivilegeAssignment(principal="principal1", privileges=["APPLY_TAG", "WRITE_FILES"]),
+        PrivilegeAssignment(principal="principal2", privileges=["READ_FILES"]),
+    ]
 
     result = get_assignment_dict_from_permissions_list(permissions_list)
 
@@ -26,7 +24,7 @@ def test_get_assignment_dict_from_permissions_list():
 
 
 def test_get_assignment_dict_from_permissions_list_empty():
-    permissions_list = PermissionsList(privilege_assignments=None)
+    permissions_list = None
 
     result = get_assignment_dict_from_permissions_list(permissions_list)
 
@@ -113,13 +111,11 @@ def test_get_permission_changes_no_principals():
 
 
 def test_get_permission_changes():
-    sample_permissions_list = PermissionsList(
-        privilege_assignments=[
-            PrivilegeAssignment(principal="user1", privileges=[Privilege.APPLY_TAG]),
-            PrivilegeAssignment(principal="user2", privileges=[Privilege.CREATE]),
-            PrivilegeAssignment(principal="userToRemove", privileges=[Privilege.CREATE]),
-        ]
-    )
+    sample_permissions_list = [
+        PrivilegeAssignment(principal="user1", privileges=[Privilege.APPLY_TAG]),
+        PrivilegeAssignment(principal="user2", privileges=[Privilege.CREATE]),
+        PrivilegeAssignment(principal="userToRemove", privileges=[Privilege.CREATE]),
+    ]
     sample_privilege_assignments = [
         PrivilegeAssignment(principal="user1", privileges=[Privilege.APPLY_TAG]),
         PrivilegeAssignment(principal="user2", privileges=[Privilege.APPLY_TAG]),
