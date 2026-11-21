@@ -9,6 +9,7 @@ from databricks_cdk.utils import (
     get_account_id,
     get_request,
     post_request,
+    wait_until_found,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,6 +72,7 @@ def create_or_update_networks(properties: NetworksProperties) -> NetworksRespons
             "security_group_ids": properties.security_group_ids,
         }
         response = post_request(url, body=body)
+        wait_until_found(lambda: get_network_by_id(response["network_id"]), f"Network {properties.network_name}")
         return NetworksResponse(
             physical_resource_id=properties.network_name,
             network_name=properties.network_name,

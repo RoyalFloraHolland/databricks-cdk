@@ -3,7 +3,7 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, get_request, post_request
+from databricks_cdk.utils import CnfResponse, get_request, post_request, wait_until_found
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,10 @@ def create_or_update_cluster_policy(
         )
     if current is None:
         response = post_request(url=f"{base_url}/create", body=body)
+        wait_until_found(
+            lambda: get_cluster_policy_by_id(response["policy_id"], properties.workspace_url),
+            f"Cluster policy {properties.cluster_policy.name}",
+        )
         return CnfResponse(physical_resource_id=response["policy_id"])
     else:
         policy_id = current["policy_id"]
