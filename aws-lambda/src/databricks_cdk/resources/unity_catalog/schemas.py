@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 class Schema(BaseModel):
     name: str
     catalog_name: str
-    comment: str | None
+    comment: str | None = None
     properties: dict[str, str] = {}
-    owner: str | None
+    owner: str | None = None
 
 
 class SchemaProperties(BaseModel):

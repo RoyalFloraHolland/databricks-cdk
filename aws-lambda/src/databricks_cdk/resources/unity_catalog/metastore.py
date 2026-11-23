@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Metastore(BaseModel):
     name: str
     storage_root: str
-    owner: str | None
+    owner: str | None = None
 
 
 class MetastoreProperties(BaseModel):

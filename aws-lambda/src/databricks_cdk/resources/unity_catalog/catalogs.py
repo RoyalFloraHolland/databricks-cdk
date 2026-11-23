@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 class Catalog(BaseModel):
     name: str
-    comment: str | None
+    comment: str | None = None
     properties: dict[str, str] = {}
-    owner: str | None
+    owner: str | None = None
 
 
 class CatalogProperties(BaseModel):

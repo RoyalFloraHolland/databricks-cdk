@@ -14,7 +14,7 @@ class DockerBasicAuth(BaseModel):
 
 class DockerImage(BaseModel):
     url: str
-    basic_auth: DockerBasicAuth | None
+    basic_auth: DockerBasicAuth | None = None
 
 
 class InstancePoolAwsAttributes(BaseModel):
@@ -50,9 +50,9 @@ class InstancePoolResponse(CnfResponse):
 class InstancePoolEdit(BaseModel):
     instance_pool_id: str
     instance_pool_name: str
-    min_idle_instances: int | None
-    max_capacity: int | None
-    idle_instance_autotermination_minutes: int | None
+    min_idle_instances: int | None = None
+    max_capacity: int | None = None
+    idle_instance_autotermination_minutes: int | None = None
 
 
 def get_instance_pools_url(workspace_url: str):
