@@ -6,7 +6,7 @@ from typing import Any
 import boto3
 from databricks.sdk import AccountClient, WorkspaceClient
 from databricks.sdk.core import Config
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from requests import request
 from requests.exceptions import HTTPError
 from tenacity import retry, retry_if_exception, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -67,6 +67,9 @@ def get_authorization_headers() -> dict[str, str]:
 
 
 class CnfResponse(BaseModel):  # TODO: rename to CfnResponse
+    # Databricks returns some ids as ints (e.g. job_id); Pydantic 1 coerced them to str, Pydantic 2 does not by default
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
     physical_resource_id: str
 
 

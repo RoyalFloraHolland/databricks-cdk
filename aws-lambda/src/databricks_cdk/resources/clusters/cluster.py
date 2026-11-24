@@ -33,7 +33,7 @@ class DockerBasicAuth(BaseModel):
 
 class DockerImage(BaseModel):
     url: str
-    basic_auth: DockerBasicAuth | None
+    basic_auth: DockerBasicAuth | None = None
 
 
 class Cluster(BaseModel):

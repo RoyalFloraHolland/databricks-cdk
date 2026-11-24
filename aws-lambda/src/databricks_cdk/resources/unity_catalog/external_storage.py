@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ExternalLocation(BaseModel):
     name: str
-    comment: str | None
+    comment: str | None = None
     url: str
     credential_name: str
     read_only: bool = False

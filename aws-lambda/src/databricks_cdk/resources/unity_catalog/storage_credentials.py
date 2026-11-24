@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class StorageCredential(BaseModel):
     name: str
-    comment: str | None
+    comment: str | None = None
 
 
 class AwsIamRole(BaseModel):
