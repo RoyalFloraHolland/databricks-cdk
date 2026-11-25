@@ -4,7 +4,7 @@ from typing import Any, cast
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound, ResourceConflict
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from databricks_cdk.utils import CnfResponse, get_workspace_client
 
@@ -139,6 +139,8 @@ class PatchTagsRequest(BaseModel):
 
 
 class ModelVersionByAlias(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
     version: str
 
 

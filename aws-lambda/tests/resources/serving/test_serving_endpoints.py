@@ -15,6 +15,7 @@ from databricks_cdk.resources.serving.serving_endpoints import (
     WorkloadType,
     create_or_update_serving_endpoint,
     delete_serving_endpoint,
+    resolve_alias,
     sync_serving_endpoint_tags,
 )
 from databricks_cdk.utils import CnfResponse
@@ -356,3 +357,10 @@ def test_unknown_config_update_state_is_not_treated_as_in_progress(patched_get_w
     create_or_update_serving_endpoint(_properties(workload_size="Medium"), "endpoint")
 
     do.assert_any_call("PUT", "/api/2.0/serving-endpoints/endpoint/config", body=_config("3", "Medium"))
+
+
+def test_resolve_alias_accepts_numeric_version(workspace_client):
+    workspace_client.api_client = MagicMock()
+    workspace_client.api_client.do.return_value = {"model_name": "catalog.schema.model", "version": 1}
+
+    assert resolve_alias(workspace_client, "catalog.schema.model", "champion") == "1"
