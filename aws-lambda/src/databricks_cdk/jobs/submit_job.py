@@ -5,12 +5,12 @@ from databricks_cdk.utils import post_request
 
 class JobArgs(BaseModel):
     job_id: int
-    idempotency_token: str | None
-    jar_params: list[str] | None
-    notebook_params: dict | None
-    python_params: list[str] | None
-    spark_submit_params: list[str] | None
-    python_named_params: dict | None
+    idempotency_token: str | None = None
+    jar_params: list[str] | None = None
+    notebook_params: dict | None = None
+    python_params: list[str] | None = None
+    spark_submit_params: list[str] | None = None
+    python_named_params: dict | None = None
 
 
 class SubmitJobEvent(BaseModel):

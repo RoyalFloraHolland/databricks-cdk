@@ -26,8 +26,8 @@ class TokenProperties(BaseModel):
     action: str = "token"
     token_name: str
     workspace_url: str
-    lifetime_seconds: int | None
-    comment: str | None
+    lifetime_seconds: int | None = None
+    comment: str | None = None
 
 
 class TokenCreateReponse(CnfResponse):

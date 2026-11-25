@@ -25,7 +25,7 @@ class PolicyElement(BaseModel):
 
 class ClusterPolicy(BaseModel):
     name: str
-    description: str | None
+    description: str | None = None
     definition: dict[str, PolicyElement]
 
 
