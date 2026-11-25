@@ -9,9 +9,10 @@ from databricks_cdk.resources.sql_warehouses.sql_warehouses import (
 from databricks_cdk.utils import CnfResponse
 
 
+@patch("databricks_cdk.resources.sql_warehouses.sql_warehouses.get_request")
 @patch("databricks_cdk.resources.sql_warehouses.sql_warehouses.get_warehouse_by_name")
 @patch("databricks_cdk.resources.sql_warehouses.sql_warehouses.post_request")
-def test_create_warehouse(patched_get_post_request, patched_get_warehouse_by_name):
+def test_create_warehouse(patched_get_post_request, patched_get_warehouse_by_name, patched_get_request):
     patched_get_post_request.return_value = {"id": "some_id"}
     patched_get_warehouse_by_name.return_value = None
 

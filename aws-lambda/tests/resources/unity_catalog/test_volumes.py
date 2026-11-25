@@ -122,8 +122,8 @@ def test_update_volume(workspace_client):
 
     assert response == VolumeResponse(name="mock_name", physical_resource_id="some_id")
     workspace_client.volumes.update.assert_called_once_with(
-        full_name_arg="catalog.schema.mock_name",
-        name="mock_name",
+        name="catalog.schema.mock_name",
+        new_name="mock_name",
         comment="some comment",
     )
 
@@ -141,5 +141,5 @@ def test_delete_volume(patched_get_workspace_client, workspace_client):
 
     assert response == CnfResponse(physical_resource_id="some_id")
     workspace_client.volumes.delete.assert_called_once_with(
-        full_name_arg="catalog.schema.mock_name",
+        name="catalog.schema.mock_name",
     )
