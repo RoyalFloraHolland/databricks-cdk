@@ -6,6 +6,7 @@ from requests.exceptions import HTTPError
 from requests.models import Response
 
 from databricks_cdk.utils import (
+    ResourceNotReadyError,
     _do_request,
     delete_request,
     get_account_client,
@@ -17,6 +18,8 @@ from databricks_cdk.utils import (
     patch_request,
     post_request,
     put_request,
+    wait_until_found,
+    wait_until_ready,
 )
 
 
@@ -215,3 +218,54 @@ def test_get_account_client(
         host="https://accounts.cloud.databricks.com",
         account_id=patched_get_account_id.return_value,
     )
+
+
+def test_wait_until_ready_returns_when_ready(patched_sleep):
+    check_fn = MagicMock(side_effect=[ResourceNotReadyError("pending"), ResourceNotReadyError("pending"), "ready"])
+
+    assert wait_until_ready(check_fn, "test resource") == "ready"
+
+    assert check_fn.call_count == 3
+    # exponential backoff between the checks
+    assert [c.args[0] for c in patched_sleep.call_args_list] == [2, 3]
+
+
+def test_wait_until_ready_no_sleep_when_ready_immediately(patched_sleep):
+    assert wait_until_ready(lambda: "ready", "test resource") == "ready"
+
+    patched_sleep.assert_not_called()
+
+
+def test_wait_until_ready_backoff_capped(patched_sleep):
+    check_fn = MagicMock(side_effect=[ResourceNotReadyError("pending")] * 10 + ["ready"])
+
+    wait_until_ready(check_fn, "test resource", timeout_seconds=1000, max_delay=10)
+
+    assert max(c.args[0] for c in patched_sleep.call_args_list) == 10
+
+
+def test_wait_until_ready_timeout(patched_sleep):
+    check_fn = MagicMock(side_effect=ResourceNotReadyError("pending"))
+
+    with pytest.raises(TimeoutError, match="test resource was not ready within 60s: pending"):
+        wait_until_ready(check_fn, "test resource", timeout_seconds=60)
+
+    # never sleeps past the deadline
+    assert sum(c.args[0] for c in patched_sleep.call_args_list) == 60
+
+
+def test_wait_until_ready_other_errors_are_raised(patched_sleep):
+    check_fn = MagicMock(side_effect=ValueError("broken"))
+
+    with pytest.raises(ValueError, match="broken"):
+        wait_until_ready(check_fn, "test resource")
+
+    assert check_fn.call_count == 1
+    patched_sleep.assert_not_called()
+
+
+def test_wait_until_found_timeout():
+    get_fn = MagicMock(return_value=None)
+
+    with pytest.raises(TimeoutError, match="test resource was not ready within 30s: not found"):
+        wait_until_found(get_fn, "test resource", timeout_seconds=30)
