@@ -3,7 +3,15 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request, wait_until_found
+from databricks_cdk.utils import (
+    CnfResponse,
+    delete_request,
+    get_request,
+    matches_current,
+    patch_request,
+    post_request,
+    wait_until_found,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +85,11 @@ def create_or_update_storage_credential(
             lambda: get_storage_credential_by_name(properties.storage_credential.name, base_url=base_url),
             f"Storage credential {properties.storage_credential.name}",
         )
+    elif matches_current(body, current):
+        # Databricks refuses updates to a credential that external locations use (unless forced),
+        # so don't send one when nothing changed, e.g. when CDK takes over an existing credential.
+        logger.info(f"Storage credential {properties.storage_credential.name} is up to date, not updating it")
+        response = current
     else:
         response = patch_request(f"{base_url}/{properties.storage_credential.name}", body=body)
     return StorageCredentialsResponse(

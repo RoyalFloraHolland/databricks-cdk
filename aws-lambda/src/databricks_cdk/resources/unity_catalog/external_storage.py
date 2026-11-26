@@ -3,7 +3,15 @@ import logging
 
 from pydantic import BaseModel
 
-from databricks_cdk.utils import CnfResponse, delete_request, get_request, patch_request, post_request, wait_until_found
+from databricks_cdk.utils import (
+    CnfResponse,
+    delete_request,
+    get_request,
+    matches_current,
+    patch_request,
+    post_request,
+    wait_until_found,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +59,8 @@ def create_or_update_external_location(
             lambda: get_external_location_by_name(properties.external_location.name, base_url=base_url),
             f"External location {properties.external_location.name}",
         )
+    elif matches_current(body, current):
+        logger.info(f"External location {properties.external_location.name} is up to date, not updating it")
     else:
         patch_request(f"{base_url}/{properties.external_location.name}", body=body)
     return ExternalLocationResponse(

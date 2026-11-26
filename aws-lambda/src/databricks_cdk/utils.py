@@ -212,6 +212,20 @@ class ResourceNotReadyError(Exception):
     """Raised by a readiness check when a resource is not visible or usable yet"""
 
 
+def matches_current(desired: Any, current: Any) -> bool:
+    """
+    Whether the existing Databricks object already has every value the desired properties set.
+
+    Only the desired fields are compared, recursively, so fields Databricks adds (ids, timestamps, generated values)
+    don't count as differences. A desired None matches a missing or None value.
+    """
+    if desired is None:
+        return current is None
+    if isinstance(desired, dict):
+        return isinstance(current, dict) and all(matches_current(v, current.get(k)) for k, v in desired.items())
+    return bool(desired == current)
+
+
 def is_not_found_error(error: Exception) -> bool:
     """Whether an error from the Databricks REST api or sdk means the requested resource does not exist"""
     if isinstance(error, NotFound):
