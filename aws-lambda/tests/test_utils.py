@@ -15,6 +15,7 @@ from databricks_cdk.utils import (
     get_client_secret,
     get_request,
     get_workspace_client,
+    matches_current,
     patch_request,
     post_request,
     put_request,
@@ -269,3 +270,16 @@ def test_wait_until_found_timeout():
 
     with pytest.raises(TimeoutError, match="test resource was not ready within 30s: not found"):
         wait_until_found(get_fn, "test resource", timeout_seconds=30)
+
+
+def test_matches_current_ignores_fields_databricks_adds():
+    desired = {"name": "credential", "comment": None, "aws_iam_role": {"role_arn": "arn"}}
+    current = {"name": "credential", "id": "x", "aws_iam_role": {"role_arn": "arn", "external_id": "ext"}}
+
+    assert matches_current(desired, current)
+
+
+def test_matches_current_spots_a_changed_value():
+    assert not matches_current({"aws_iam_role": {"role_arn": "new"}}, {"aws_iam_role": {"role_arn": "old"}})
+    assert not matches_current({"comment": "set"}, {})
+    assert not matches_current({"read_only": False}, {"read_only": True})
